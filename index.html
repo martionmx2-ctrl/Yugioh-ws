@@ -8,6 +8,10 @@
   let drawSound = new Audio("draw.mp3");
   let attackSound = new Audio("attack.mp3");
 
+  // 🔊 Volume control (PUT IT HERE)
+  drawSound.volume = 0.5;
+  attackSound.volume = 0.7;
+
   function drawCard() {
     let random = cards[Math.floor(Math.random() * cards.length)];
     document.getElementById("cardZone").innerText = random;
