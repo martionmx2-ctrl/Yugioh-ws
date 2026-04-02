@@ -1,37 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Duelist Hub</title>
+  <title>Duel Interface</title>
+
   <style>
     body {
-      background: black;
-      color: gold;
+      margin: 0;
+      background: radial-gradient(circle, #000 40%, #020024 100%);
+      color: white;
       font-family: Arial;
       text-align: center;
     }
 
     nav {
-      background: #111;
+      background: black;
       padding: 15px;
+      border-bottom: 2px solid cyan;
     }
 
     nav a {
-      color: gold;
+      color: cyan;
       margin: 0 15px;
       text-decoration: none;
       font-weight: bold;
     }
 
-    .hero {
-      margin-top: 50px;
+    .arena {
+      margin-top: 30px;
+    }
+
+    .lp {
+      font-size: 24px;
+      margin: 10px;
+    }
+
+    .card-zone {
+      margin-top: 40px;
     }
 
     .card {
+      width: 150px;
+      height: 220px;
+      background: black;
       border: 2px solid gold;
-      padding: 20px;
-      margin: 30px auto;
-      width: 300px;
+      display: inline-block;
+      line-height: 220px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: scale(1.1);
       box-shadow: 0 0 20px gold;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: cyan;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -39,25 +68,45 @@
 <body>
 
   <nav>
-    <a href="index.html">Home</a>
-    <a href="deck.html">My Deck</a>
+    <a href="index.html">Duel</a>
+    <a href="deck.html">Deck</a>
     <a href="about.html">About</a>
   </nav>
 
-  <div class="hero">
-    <h1>🔥 Duelist Hub 🔥</h1>
-    <p>Welcome to the arena.</p>
+  <h1>⚡ DUEL ARENA ⚡</h1>
+
+  <div class="arena">
+    <div class="lp">Your LP: <span id="playerLP">4000</span></div>
+    <div class="lp">Enemy LP: <span id="enemyLP">4000</span></div>
   </div>
 
-  <div class="card">
-    <h2>MartianMx2</h2>
-    <p>Future King of Games</p>
-    <button onclick="summon()">Draw Card</button>
+  <button onclick="drawCard()">Draw Card</button>
+  <button onclick="attack()">Attack</button>
+
+  <div class="card-zone">
+    <div class="card" id="cardZone">?</div>
   </div>
 
   <script>
-    function summon() {
-      alert("You drew a powerful card!");
+    let cards = [
+      "Blue-Eyes White Dragon",
+      "Dark Magician",
+      "Red-Eyes Black Dragon"
+    ];
+
+    function drawCard() {
+      let random = cards[Math.floor(Math.random() * cards.length)];
+      document.getElementById("cardZone").innerText = random;
+    }
+
+    function attack() {
+      let enemyLP = document.getElementById("enemyLP");
+      let value = parseInt(enemyLP.innerText);
+
+      value -= 500;
+      if (value < 0) value = 0;
+
+      enemyLP.innerText = value;
     }
   </script>
 
