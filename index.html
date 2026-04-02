@@ -1,36 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Yu-Gi-Oh Duelist</title>
+  <title>Duelist Hub</title>
   <style>
     body {
       background: black;
       color: gold;
-      text-align: center;
       font-family: Arial;
+      text-align: center;
     }
+
+    nav {
+      background: #111;
+      padding: 15px;
+    }
+
+    nav a {
+      color: gold;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .hero {
+      margin-top: 50px;
+    }
+
     .card {
       border: 2px solid gold;
       padding: 20px;
-      margin: 50px auto;
+      margin: 30px auto;
       width: 300px;
       box-shadow: 0 0 20px gold;
     }
   </style>
 </head>
+
 <body>
 
-  <h1>🔥 Duelist Profile 🔥</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="deck.html">My Deck</a>
+    <a href="about.html">About</a>
+  </nav>
+
+  <div class="hero">
+    <h1>🔥 Duelist Hub 🔥</h1>
+    <p>Welcome to the arena.</p>
+  </div>
 
   <div class="card">
     <h2>MartianMx2</h2>
     <p>Future King of Games</p>
-    <button onclick="summon()">Summon Monster</button>
+    <button onclick="summon()">Draw Card</button>
   </div>
 
   <script>
     function summon() {
-      alert("Blue-Eyes White Dragon appears!");
+      alert("You drew a powerful card!");
     }
   </script>
 
