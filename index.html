@@ -140,7 +140,19 @@
   drawSound.volume = 0.5;
   attackSound.volume = 0.7;
 
+  let playerTurn = true;
+
+  function updateTurnDisplay() {
+    let turnText = document.getElementById("turnText");
+    turnText.innerText = playerTurn ? "Your Turn" : "Enemy Turn";
+  }
+
   function drawCard() {
+    if (!playerTurn) {
+      alert("Wait for your turn!");
+      return;
+    }
+
     let card = document.getElementById("card");
     let front = document.getElementById("cardFront");
 
@@ -158,6 +170,11 @@
   }
 
   function attack() {
+    if (!playerTurn) {
+      alert("It's not your turn!");
+      return;
+    }
+
     let enemyLP = document.getElementById("enemyLP");
     let body = document.getElementById("body");
 
@@ -173,8 +190,11 @@
     attackSound.currentTime = 0;
     attackSound.play();
 
-    // 🤖 Enemy turn after delay
-    setTimeout(enemyTurn, 1000);
+    // switch turn
+    playerTurn = false;
+    updateTurnDisplay();
+
+    setTimeout(enemyTurn, 1200);
   }
 
   function enemyTurn() {
@@ -182,8 +202,6 @@
     let body = document.getElementById("body");
 
     let value = parseInt(playerLP.innerText);
-
-    // random damage
     let damage = Math.floor(Math.random() * 400) + 300;
 
     value -= damage;
@@ -191,7 +209,6 @@
 
     playerLP.innerText = value;
 
-    // screen shake again
     body.classList.add("shake");
     setTimeout(() => body.classList.remove("shake"), 300);
 
@@ -199,7 +216,15 @@
     attackSound.play();
 
     alert("Enemy attacks! -" + damage + " LP");
+
+    // back to player
+    playerTurn = true;
+    updateTurnDisplay();
   }
+
+  // initialize turn display
+  window.onload = updateTurnDisplay;
+    
 </script>
 
 </body>
