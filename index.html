@@ -166,29 +166,6 @@
 </div>
 
 <script>
-
-function startGame() {
-  // draw 5 cards for player
-  for (let i = 0; i < 5; i++) {
-    let card = cards[Math.floor(Math.random() * cards.length)];
-    hand.push(card);
-  }
-
-  renderHand();
-
-  // optional: give enemy starting field (feels better)
-  for (let i = 0; i < 2; i++) {
-    let index = i;
-    let card = cards[Math.floor(Math.random() * cards.length)];
-
-    enemyField[index] = card;
-
-    let zone = document.getElementById("enemy" + index);
-    zone.style.backgroundImage = `url(${card.img})`;
-    zone.innerText = "ATK:" + card.atk;
-  }
-}
-  
 let cards = [
   {name:"Blue-Eyes", atk:3000, img:"https://images.ygoprodeck.com/images/cards/89631139.jpg"},
   {name:"Dark Magician", atk:2500, img:"https://images.ygoprodeck.com/images/cards/46986414.jpg"},
@@ -201,10 +178,50 @@ let enemyField=[null,null,null];
 
 let playerTurn=true, gameOver=false;
 
-function drawCard(){
-  if(!playerTurn||gameOver) return;
+/* 🔄 TURN DISPLAY */
+function updateTurnText() {
+  document.getElementById("turnText").innerText =
+    playerTurn ? "Your Turn" : "Enemy Turn";
+}
 
-  let card=cards[Math.floor(Math.random()*cards.length)];
+/* 🎴 START GAME (DRAW 5 WITH ANIMATION) */
+function startGame() {
+  let count = 0;
+
+  let interval = setInterval(() => {
+    let card = cards[Math.floor(Math.random()*cards.length)];
+    hand.push(card);
+
+    // animation
+    let anim = document.createElement("div");
+    anim.className = "draw-anim";
+    anim.style.backgroundImage = `url(${card.img})`;
+    document.body.appendChild(anim);
+
+    setTimeout(() => anim.remove(), 600);
+
+    renderHand();
+
+    count++;
+    if (count >= 5) clearInterval(interval);
+  }, 300);
+
+  // enemy starting field
+  for (let i = 0; i < 2; i++) {
+    let card = cards[Math.floor(Math.random()*cards.length)];
+    enemyField[i] = card;
+
+    let zone = document.getElementById("enemy"+i);
+    zone.style.backgroundImage = `url(${card.img})`;
+    zone.innerText = "ATK:"+card.atk;
+  }
+}
+
+/* 🎴 DRAW CARD */
+function drawCard(){
+  if(!playerTurn || gameOver) return;
+
+  let card = cards[Math.floor(Math.random()*cards.length)];
   hand.push(card);
 
   let anim=document.createElement("div");
@@ -218,21 +235,30 @@ function drawCard(){
   },600);
 }
 
+/* 🖐️ HAND RENDER */
 function renderHand(){
   let h=document.getElementById("hand");
   h.innerHTML="";
+
   hand.forEach((c,i)=>{
     let d=document.createElement("div");
     d.className="hand-card";
     d.style.backgroundImage=`url(${c.img})`;
+
     if(i===selected) d.classList.add("selected");
-    d.onclick=()=>{selected=i;renderHand();}
+
+    d.onclick=()=>{
+      selected=i;
+      renderHand();
+    };
+
     h.appendChild(d);
   });
 }
 
+/* 📥 PLACE CARD */
 function placeCard(i){
-  if(gameOver||selected===null||playerField[i]) return;
+  if(gameOver || selected===null || playerField[i]) return;
 
   let card=hand[selected];
   playerField[i]=card;
@@ -243,23 +269,29 @@ function placeCard(i){
 
   hand.splice(selected,1);
   selected=null;
+
   renderHand();
 }
 
+/* ⚔️ ATTACK */
 function attack(){
-  if(!playerTurn||gameOver) return;
+  if(!playerTurn || gameOver) return;
 
   let dmg=playerField.reduce((s,c)=>s+(c?c.atk:0),0);
-  let e=document.getElementById("enemyLP");
-  e.innerText=Math.max(0,e.innerText-dmg);
+
+  let enemyLP=document.getElementById("enemyLP");
+  enemyLP.innerText=Math.max(0,enemyLP.innerText-dmg);
 
   checkGame();
+
   if(!gameOver){
     playerTurn=false;
+    updateTurnText();
     setTimeout(enemyTurn,1000);
   }
 }
 
+/* 🤖 ENEMY TURN */
 function enemyTurn(){
   if(gameOver) return;
 
@@ -267,37 +299,46 @@ function enemyTurn(){
   let card=cards[Math.floor(Math.random()*cards.length)];
   enemyField[i]=card;
 
-  let z=document.getElementById("enemy"+i);
-  z.style.backgroundImage=`url(${card.img})`;
-  z.innerText="ATK:"+card.atk;
+  let zone=document.getElementById("enemy"+i);
+  zone.style.backgroundImage=`url(${card.img})`;
+  zone.innerText="ATK:"+card.atk;
 
   let dmg=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
-  let p=document.getElementById("playerLP");
-  p.innerText=Math.max(0,p.innerText-dmg);
+
+  let playerLP=document.getElementById("playerLP");
+  playerLP.innerText=Math.max(0,playerLP.innerText-dmg);
 
   checkGame();
+
   playerTurn=true;
+  updateTurnText();
 }
 
+/* 🏁 GAME CHECK */
 function checkGame(){
-  let p=parseInt(playerLP.innerText);
-  let e=parseInt(enemyLP.innerText);
+  let p=parseInt(document.getElementById("playerLP").innerText);
+  let e=parseInt(document.getElementById("enemyLP").innerText);
+
   if(e<=0) end("YOU WIN");
   if(p<=0) end("YOU LOSE");
 }
 
+/* 🏆 END */
 function end(msg){
   gameOver=true;
   document.getElementById("gameResult").innerText=msg;
   document.getElementById("gameOverScreen").style.display="flex";
 }
 
+/* 🔁 RESTART */
 function restartGame(){
   location.reload();
 }
 
-  window.onload = function() {
+/* 🚀 INIT */
+window.onload = function(){
   startGame();
+  updateTurnText();
 };
 </script>
 
