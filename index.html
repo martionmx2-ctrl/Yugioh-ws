@@ -122,19 +122,3 @@
   }
 </script>
 
-    function drawCard() {
-      let random = cards[Math.floor(Math.random() * cards.length)];
-      document.getElementById("cardZone").innerText = random;
-    }
-
-    function attack() {
-      let enemyLP = document.getElementById("enemyLP");
-      let value = parseInt(enemyLP.innerText);
-
-      value -= 500;
-      if (value < 0) value = 0;
-
-      enemyLP.innerText = value;
-    }
-  </script>
-
