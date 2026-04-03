@@ -88,11 +88,37 @@
   </div>
 
   <script>
-    let cards = [
-      "Blue-Eyes White Dragon",
-      "Dark Magician",
-      "Red-Eyes Black Dragon"
-    ];
+    <script>
+  let cards = [
+    "Blue-Eyes White Dragon",
+    "Dark Magician",
+    "Red-Eyes Black Dragon"
+  ];
+
+  let drawSound = new Audio("draw.mp3");
+  let attackSound = new Audio("attack.mp3");
+
+  function drawCard() {
+    let random = cards[Math.floor(Math.random() * cards.length)];
+    document.getElementById("cardZone").innerText = random;
+
+    drawSound.currentTime = 0;
+    drawSound.play();
+  }
+
+  function attack() {
+    let enemyLP = document.getElementById("enemyLP");
+    let value = parseInt(enemyLP.innerText);
+
+    value -= 500;
+    if (value < 0) value = 0;
+
+    enemyLP.innerText = value;
+
+    attackSound.currentTime = 0;
+    attackSound.play();
+  }
+</script>
 
     function drawCard() {
       let random = cards[Math.floor(Math.random() * cards.length)];
