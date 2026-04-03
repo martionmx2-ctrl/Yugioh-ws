@@ -36,8 +36,19 @@
     }
 
     .card-zone {
-      margin-top: 40px;
-      perspective: 1000px;
+      <h2>Your Field</h2>
+<div class="field" id="playerField">
+  <div class="zone" onclick="placeCard(0)"></div>
+  <div class="zone" onclick="placeCard(1)"></div>
+  <div class="zone" onclick="placeCard(2)"></div>
+</div>
+
+<h2>Enemy Field</h2>
+<div class="field" id="enemyField">
+  <div class="zone" id="enemy0"></div>
+  <div class="zone" id="enemy1"></div>
+  <div class="zone" id="enemy2"></div>
+</div>
     }
 
     .card {
