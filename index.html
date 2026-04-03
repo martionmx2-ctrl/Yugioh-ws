@@ -10,7 +10,6 @@
       color: white;
       font-family: Arial;
       text-align: center;
-      overflow-x: hidden;
     }
 
     nav {
@@ -26,28 +25,6 @@
       font-weight: bold;
     }
 
-    .arena {
-      margin-top: 30px;
-    }
-
-    .hand-card {
-  width: 80px;
-  height: 120px;
-  background-size: cover;
-  background-position: center;
-  border: 2px solid gold;
-  cursor: pointer;
-  transition: 0.2s;
-  }
-
-  .hand-card:hover {
-    transform: scale(1.1);
-  }
-
-  .selected {
-    box-shadow: 0 0 20px yellow;
-  }
-    
     .lp {
       font-size: 24px;
       margin: 10px;
@@ -67,15 +44,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      background: rgba(0,0,0,0.7);
       background-size: cover;
       background-position: center;
-      color: white;
-      font-weight: bold;
-      font-size: 12px;
       white-space: pre-line;
-      text-align: center;
+      font-size: 12px;
     }
 
     .zone:hover {
@@ -83,13 +55,6 @@
     }
 
     button {
-      <h2>Your Hand</h2>
-      <div id="hand" style="
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      margin:20px;
-      "></div>
       margin-top: 20px;
       padding: 10px 20px;
       background: cyan;
@@ -98,38 +63,48 @@
       font-weight: bold;
     }
 
-    .shake {
-      animation: shake 0.3s;
+    /* HAND */
+    .hand {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px;
     }
 
-    @keyframes shake {
-      0% { transform: translate(0px); }
-      25% { transform: translate(5px, -5px); }
-      50% { transform: translate(-5px, 5px); }
-      75% { transform: translate(5px, 5px); }
-      100% { transform: translate(0px); }
+    .hand-card {
+      width: 80px;
+      height: 120px;
+      background-size: cover;
+      border: 2px solid gold;
+      cursor: pointer;
+    }
+
+    .selected {
+      box-shadow: 0 0 20px yellow;
     }
   </style>
 </head>
 
-<body id="body">
+<body>
 
   <nav>
     <a href="index.html">Duel</a>
-    <a href="deck.html">Deck</a>
-    <a href="about.html">About</a>
   </nav>
 
   <h1>⚡ DUEL ARENA ⚡</h1>
   <h2 id="turnText">Your Turn</h2>
 
-  <div class="arena">
-    <div class="lp">Your LP: <span id="playerLP">4000</span></div>
-    <div class="lp">Enemy LP: <span id="enemyLP">4000</span></div>
+  <div>
+    Your LP: <span id="playerLP">4000</span> |
+    Enemy LP: <span id="enemyLP">4000</span>
   </div>
 
   <button onclick="drawCard()">Draw Card</button>
   <button onclick="attack()">Attack</button>
+
+  <!-- HAND -->
+  <h2>Your Hand</h2>
+  <div id="hand" class="hand"></div>
 
   <!-- PLAYER FIELD -->
   <h2>Your Field</h2>
@@ -141,196 +116,121 @@
 
   <!-- ENEMY FIELD -->
   <h2>Enemy Field</h2>
-  <div class="field" id="enemyField">
+  <div class="field">
     <div class="zone" id="enemy0"></div>
     <div class="zone" id="enemy1"></div>
     <div class="zone" id="enemy2"></div>
   </div>
 
-  <!-- GAME OVER SCREEN -->
-  <div id="gameOverScreen" style="
-    display:none;
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:black;
-    color:white;
-    font-size:40px;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-  ">
-    <div id="gameResult"></div>
-    <button onclick="restartGame()">Restart Duel</button>
+  <!-- GAME OVER -->
+  <div id="gameOverScreen" style="display:none;">
+    <h1 id="gameResult"></h1>
+    <button onclick="location.reload()">Restart</button>
   </div>
 
-  <script>
-  <script>
-  let cards = [
-    {
-      name: "Blue-Eyes White Dragon",
-      atk: 3000,
-      img: "https://images.ygoprodeck.com/images/cards/89631139.jpg"
-    },
-    {
-      name: "Dark Magician",
-      atk: 2500,
-      img: "https://images.ygoprodeck.com/images/cards/46986414.jpg"
-    },
-    {
-      name: "Red-Eyes Black Dragon",
-      atk: 2400,
-      img: "https://images.ygoprodeck.com/images/cards/74677422.jpg"
-    }
-  ];
+<script>
+let cards = [
+  { name: "Blue-Eyes", atk: 3000, img: "https://images.ygoprodeck.com/images/cards/89631139.jpg" },
+  { name: "Dark Magician", atk: 2500, img: "https://images.ygoprodeck.com/images/cards/46986414.jpg" },
+  { name: "Red-Eyes", atk: 2400, img: "https://images.ygoprodeck.com/images/cards/74677422.jpg" }
+];
 
-  let hand = [];
-  let selectedCardIndex = null;
+let hand = [];
+let selectedCardIndex = null;
+let playerField = [null,null,null];
+let enemyField = [null,null,null];
 
-  let playerField = [null, null, null];
-  let enemyField = [null, null, null];
+let playerTurn = true;
+let gameOver = false;
 
-  let drawSound = new Audio("draw.mp3");
-  let attackSound = new Audio("attack.mp3");
+function drawCard(){
+  if(!playerTurn) return;
 
-  let playerTurn = true;
-  let gameOver = false;
+  let card = cards[Math.floor(Math.random()*cards.length)];
+  hand.push(card);
+  renderHand();
+}
 
-  function updateTurnDisplay() {
-    document.getElementById("turnText").innerText =
-      playerTurn ? "Your Turn" : "Enemy Turn";
-  }
+function renderHand(){
+  let handDiv = document.getElementById("hand");
+  handDiv.innerHTML="";
 
-  function drawCard() {
-    if (!playerTurn || gameOver) return;
+  hand.forEach((card,i)=>{
+    let div=document.createElement("div");
+    div.className="hand-card";
+    div.style.backgroundImage=`url(${card.img})`;
 
-    let newCard = cards[Math.floor(Math.random() * cards.length)];
-    hand.push(newCard);
+    if(i===selectedCardIndex) div.classList.add("selected");
 
-    drawSound.currentTime = 0;
-    drawSound.play();
+    div.onclick=()=>{
+      selectedCardIndex=i;
+      renderHand();
+    };
 
-    renderHand();
-  }
+    handDiv.appendChild(div);
+  });
+}
 
-  function renderHand() {
-    let handDiv = document.getElementById("hand");
-    handDiv.innerHTML = "";
+function placeCard(i){
+  if(selectedCardIndex===null) return;
 
-    hand.forEach((card, index) => {
-      let cardDiv = document.createElement("div");
-      cardDiv.className = "hand-card";
-      cardDiv.style.backgroundImage = `url(${card.img})`;
+  let card=hand[selectedCardIndex];
+  playerField[i]=card;
 
-      if (index === selectedCardIndex) {
-        cardDiv.classList.add("selected");
-      }
+  let zone=document.getElementById("playerField").children[i];
+  zone.style.backgroundImage=`url(${card.img})`;
+  zone.innerText="ATK:"+card.atk;
 
-      cardDiv.onclick = () => {
-        selectedCardIndex = index;
-        renderHand();
-      };
+  hand.splice(selectedCardIndex,1);
+  selectedCardIndex=null;
 
-      handDiv.appendChild(cardDiv);
-    });
-  }
+  renderHand();
+}
 
-  function placeCard(index) {
-    if (!playerTurn || gameOver) return;
+function attack(){
+  let total=playerField.reduce((s,c)=>s+(c?c.atk:0),0);
 
-    if (selectedCardIndex === null) {
-      alert("Select a card from your hand!");
-      return;
-    }
+  let enemyLP=document.getElementById("enemyLP");
+  enemyLP.innerText=Math.max(0,enemyLP.innerText-total);
 
-    if (playerField[index]) {
-      alert("Zone occupied!");
-      return;
-    }
+  checkGame();
 
-    let card = hand[selectedCardIndex];
-    playerField[index] = card;
+  playerTurn=false;
+  setTimeout(enemyTurn,1000);
+}
 
-    let zone = document.getElementById("playerField").children[index];
-    zone.style.backgroundImage = `url(${card.img})`;
-    zone.innerText = "ATK: " + card.atk;
+function enemyTurn(){
+  let i=Math.floor(Math.random()*3);
+  let card=cards[Math.floor(Math.random()*cards.length)];
 
-    // remove from hand
-    hand.splice(selectedCardIndex, 1);
-    selectedCardIndex = null;
+  enemyField[i]=card;
 
-    renderHand();
-  }
+  let zone=document.getElementById("enemy"+i);
+  zone.style.backgroundImage=`url(${card.img})`;
+  zone.innerText="ATK:"+card.atk;
 
-  function attack() {
-    if (!playerTurn || gameOver) return;
+  let total=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
 
-    let totalAtk = playerField.reduce((sum, c) => sum + (c ? c.atk : 0), 0);
+  let playerLP=document.getElementById("playerLP");
+  playerLP.innerText=Math.max(0,playerLP.innerText-total);
 
-    let enemyLP = document.getElementById("enemyLP");
-    enemyLP.innerText = Math.max(0, enemyLP.innerText - totalAtk);
+  checkGame();
+  playerTurn=true;
+}
 
-    attackSound.play();
+function checkGame(){
+  let p=parseInt(playerLP.innerText);
+  let e=parseInt(enemyLP.innerText);
 
-    checkGameState();
+  if(e<=0) end("YOU WIN");
+  if(p<=0) end("YOU LOSE");
+}
 
-    if (!gameOver) {
-      playerTurn = false;
-      updateTurnDisplay();
-      setTimeout(enemyTurn, 1000);
-    }
-  }
-
-  function enemyTurn() {
-    if (gameOver) return;
-
-    let index = Math.floor(Math.random() * 3);
-    let card = cards[Math.floor(Math.random() * cards.length)];
-
-    if (!enemyField[index]) {
-      enemyField[index] = card;
-
-      let zone = document.getElementById("enemy" + index);
-      zone.style.backgroundImage = `url(${card.img})`;
-      zone.innerText = "ATK: " + card.atk;
-    }
-
-    let totalAtk = enemyField.reduce((sum, c) => sum + (c ? c.atk : 0), 0);
-
-    let playerLP = document.getElementById("playerLP");
-    playerLP.innerText = Math.max(0, playerLP.innerText - totalAtk);
-
-    attackSound.play();
-
-    checkGameState();
-
-    if (!gameOver) {
-      playerTurn = true;
-      updateTurnDisplay();
-    }
-  }
-
-  function checkGameState() {
-    let playerLP = parseInt(document.getElementById("playerLP").innerText);
-    let enemyLP = parseInt(document.getElementById("enemyLP").innerText);
-
-    if (enemyLP <= 0) endGame("🏆 YOU WIN!");
-    if (playerLP <= 0) endGame("💀 YOU LOSE!");
-  }
-
-  function endGame(result) {
-    gameOver = true;
-    document.getElementById("gameResult").innerText = result;
-    document.getElementById("gameOverScreen").style.display = "flex";
-  }
-
-  function restartGame() {
-    location.reload();
-  }
-
-  window.onload = updateTurnDisplay;
+function end(msg){
+  gameOver=true;
+  document.getElementById("gameOverScreen").style.display="block";
+  document.getElementById("gameResult").innerText=msg;
+}
 </script>
 
 </body>
