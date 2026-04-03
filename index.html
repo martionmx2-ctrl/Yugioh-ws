@@ -35,58 +35,28 @@
       margin: 10px;
     }
 
-    .card-zone {
-      <h2>Your Field</h2>
-<div class="field" id="playerField">
-  <div class="zone" onclick="placeCard(0)"></div>
-  <div class="zone" onclick="placeCard(1)"></div>
-  <div class="zone" onclick="placeCard(2)"></div>
-</div>
-
-<h2>Enemy Field</h2>
-<div class="field" id="enemyField">
-  <div class="zone" id="enemy0"></div>
-  <div class="zone" id="enemy1"></div>
-  <div class="zone" id="enemy2"></div>
-</div>
+    .field {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px;
     }
 
-    .card {
-      width: 150px;
-      height: 220px;
-      margin: auto;
-      transform-style: preserve-3d;
-      transition: transform 0.6s;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .card.flip {
-      transform: rotateY(180deg);
-    }
-
-    .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
+    .zone {
+      width: 120px;
+      height: 160px;
+      border: 2px solid cyan;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid gold;
+      cursor: pointer;
+      background: rgba(0,0,0,0.7);
+      white-space: pre-line;
+      text-align: center;
     }
 
-    .front {
-      background: black;
-    }
-
-    .back {
-      background: darkblue;
-      transform: rotateY(180deg);
-    }
-
-    .glow {
-      box-shadow: 0 0 30px cyan, 0 0 60px cyan;
+    .zone:hover {
+      box-shadow: 0 0 15px cyan;
     }
 
     button {
@@ -98,7 +68,6 @@
       font-weight: bold;
     }
 
-    /* 💥 screen shake */
     .shake {
       animation: shake 0.3s;
     }
@@ -111,29 +80,6 @@
       100% { transform: translate(0px); }
     }
   </style>
-
-.field {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 20px;
-}
-
-.zone {
-  width: 120px;
-  height: 160px;
-  border: 2px solid cyan;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: rgba(0,0,0,0.7);
-}
-
-.zone:hover {
-  box-shadow: 0 0 15px cyan;
-}
-  
 </head>
 
 <body id="body">
@@ -145,7 +91,7 @@
   </nav>
 
   <h1>⚡ DUEL ARENA ⚡</h1>
-   <h2 id="turnText">Your Turn</h2>
+  <h2 id="turnText">Your Turn</h2>
 
   <div class="arena">
     <div class="lp">Your LP: <span id="playerLP">4000</span></div>
@@ -155,151 +101,188 @@
   <button onclick="drawCard()">Draw Card</button>
   <button onclick="attack()">Attack</button>
 
-  <div class="card-zone">
-    <div class="card" id="card">
-      <div class="card-face front" id="cardFront">?</div>
-      <div class="card-face back" id="cardBack">🃏</div>
-    </div>
+  <!-- PLAYER FIELD -->
+  <h2>Your Field</h2>
+  <div class="field" id="playerField">
+    <div class="zone" onclick="placeCard(0)"></div>
+    <div class="zone" onclick="placeCard(1)"></div>
+    <div class="zone" onclick="placeCard(2)"></div>
   </div>
 
-<div id="gameOverScreen" style="
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:black;
-  color:white;
-  font-size:40px;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-">
-  <div id="gameResult"></div>
-  <button onclick="restartGame()">Restart Duel</button>
-</div>
-  
- <script>
-  let cards = [
-    { name: "Blue-Eyes", atk: 3000 },
-    { name: "Dark Magician", atk: 2500 },
-    { name: "Red-Eyes", atk: 2400 }
-  ];
+  <!-- ENEMY FIELD -->
+  <h2>Enemy Field</h2>
+  <div class="field" id="enemyField">
+    <div class="zone" id="enemy0"></div>
+    <div class="zone" id="enemy1"></div>
+    <div class="zone" id="enemy2"></div>
+  </div>
 
-  let currentCard = null;
-  let playerField = [null, null, null];
-  let enemyField = [null, null, null];
+  <!-- GAME OVER SCREEN -->
+  <div id="gameOverScreen" style="
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:black;
+    color:white;
+    font-size:40px;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+  ">
+    <div id="gameResult"></div>
+    <button onclick="restartGame()">Restart Duel</button>
+  </div>
 
-  let drawSound = new Audio("draw.mp3");
-  let attackSound = new Audio("attack.mp3");
+  <script>
+    let cards = [
+      { name: "Blue-Eyes White Dragon", atk: 3000 },
+      { name: "Dark Magician", atk: 2500 },
+      { name: "Red-Eyes Black Dragon", atk: 2400 }
+    ];
 
-  let playerTurn = true;
-  let gameOver = false;
+    let currentCard = null;
+    let playerField = [null, null, null];
+    let enemyField = [null, null, null];
 
-  function updateTurnDisplay() {
-    document.getElementById("turnText").innerText =
-      playerTurn ? "Your Turn" : "Enemy Turn";
-  }
+    let drawSound = new Audio("draw.mp3");
+    let attackSound = new Audio("attack.mp3");
 
-  function drawCard() {
-    if (!playerTurn || gameOver) return;
+    drawSound.volume = 0.5;
+    attackSound.volume = 0.7;
 
-    currentCard = cards[Math.floor(Math.random() * cards.length)];
-    alert("Drew: " + currentCard.name + " (" + currentCard.atk + " ATK)");
+    let playerTurn = true;
+    let gameOver = false;
 
-    drawSound.play();
-  }
-
-  function placeCard(index) {
-    if (!playerTurn || gameOver) return;
-    if (!currentCard) {
-      alert("Draw a card first!");
-      return;
+    function updateTurnDisplay() {
+      document.getElementById("turnText").innerText =
+        playerTurn ? "Your Turn" : "Enemy Turn";
     }
 
-    if (playerField[index]) {
-      alert("Zone occupied!");
-      return;
+    function drawCard() {
+      if (!playerTurn || gameOver) return;
+
+      currentCard = cards[Math.floor(Math.random() * cards.length)];
+      alert("Drew: " + currentCard.name + " (" + currentCard.atk + " ATK)");
+
+      drawSound.currentTime = 0;
+      drawSound.play();
     }
 
-    playerField[index] = currentCard;
+    function placeCard(index) {
+      if (!playerTurn || gameOver) return;
 
-    document.getElementById("playerField").children[index].innerText =
-      currentCard.name + "\n" + currentCard.atk;
+      if (!currentCard) {
+        alert("Draw a card first!");
+        return;
+      }
 
-    currentCard = null;
-  }
+      if (playerField[index]) {
+        alert("Zone occupied!");
+        return;
+      }
 
-  function attack() {
-    if (!playerTurn || gameOver) return;
+      playerField[index] = currentCard;
 
-    let totalAtk = playerField.reduce((sum, card) => {
-      return sum + (card ? card.atk : 0);
-    }, 0);
+      document.getElementById("playerField").children[index].innerText =
+        currentCard.name + "\nATK: " + currentCard.atk;
 
-    let enemyLP = document.getElementById("enemyLP");
-    enemyLP.innerText = Math.max(0, enemyLP.innerText - totalAtk);
-
-    attackSound.play();
-
-    checkGameState();
-
-    if (!gameOver) {
-      playerTurn = false;
-      updateTurnDisplay();
-      setTimeout(enemyTurn, 1000);
-    }
-  }
-
-  function enemyTurn() {
-    if (gameOver) return;
-
-    // enemy places card randomly
-    let index = Math.floor(Math.random() * 3);
-    let card = cards[Math.floor(Math.random() * cards.length)];
-
-    if (!enemyField[index]) {
-      enemyField[index] = card;
-      document.getElementById("enemy" + index).innerText =
-        card.name + "\n" + card.atk;
+      currentCard = null;
     }
 
-    // enemy attacks
-    let totalAtk = enemyField.reduce((sum, c) => sum + (c ? c.atk : 0), 0);
+    function attack() {
+      if (!playerTurn || gameOver) return;
 
-    let playerLP = document.getElementById("playerLP");
-    playerLP.innerText = Math.max(0, playerLP.innerText - totalAtk);
+      let totalAtk = playerField.reduce((sum, card) => {
+        return sum + (card ? card.atk : 0);
+      }, 0);
 
-    attackSound.play();
+      let enemyLP = document.getElementById("enemyLP");
+      let value = parseInt(enemyLP.innerText);
 
-    checkGameState();
+      value -= totalAtk;
+      if (value < 0) value = 0;
 
-    if (!gameOver) {
-      playerTurn = true;
-      updateTurnDisplay();
+      enemyLP.innerText = value;
+
+      shakeScreen();
+      playAttack();
+
+      checkGameState();
+
+      if (!gameOver) {
+        playerTurn = false;
+        updateTurnDisplay();
+        setTimeout(enemyTurn, 1000);
+      }
     }
-  }
 
-  function checkGameState() {
-    let playerLP = parseInt(document.getElementById("playerLP").innerText);
-    let enemyLP = parseInt(document.getElementById("enemyLP").innerText);
+    function enemyTurn() {
+      if (gameOver) return;
 
-    if (enemyLP <= 0) endGame("🏆 YOU WIN!");
-    if (playerLP <= 0) endGame("💀 YOU LOSE!");
-  }
+      let index = Math.floor(Math.random() * 3);
+      let card = cards[Math.floor(Math.random() * cards.length)];
 
-  function endGame(result) {
-    gameOver = true;
-    document.getElementById("gameResult").innerText = result;
-    document.getElementById("gameOverScreen").style.display = "flex";
-  }
+      if (!enemyField[index]) {
+        enemyField[index] = card;
+        document.getElementById("enemy" + index).innerText =
+          card.name + "\nATK: " + card.atk;
+      }
 
-  function restartGame() {
-    location.reload();
-  }
+      let totalAtk = enemyField.reduce((sum, c) => sum + (c ? c.atk : 0), 0);
 
-  window.onload = updateTurnDisplay;
-</script>
+      let playerLP = document.getElementById("playerLP");
+      let value = parseInt(playerLP.innerText);
+
+      value -= totalAtk;
+      if (value < 0) value = 0;
+
+      playerLP.innerText = value;
+
+      shakeScreen();
+      playAttack();
+
+      checkGameState();
+
+      if (!gameOver) {
+        playerTurn = true;
+        updateTurnDisplay();
+      }
+    }
+
+    function shakeScreen() {
+      let body = document.getElementById("body");
+      body.classList.add("shake");
+      setTimeout(() => body.classList.remove("shake"), 300);
+    }
+
+    function playAttack() {
+      attackSound.currentTime = 0;
+      attackSound.play();
+    }
+
+    function checkGameState() {
+      let playerLP = parseInt(document.getElementById("playerLP").innerText);
+      let enemyLP = parseInt(document.getElementById("enemyLP").innerText);
+
+      if (enemyLP <= 0) endGame("🏆 YOU WIN!");
+      if (playerLP <= 0) endGame("💀 YOU LOSE!");
+    }
+
+    function endGame(result) {
+      gameOver = true;
+      document.getElementById("gameResult").innerText = result;
+      document.getElementById("gameOverScreen").style.display = "flex";
+    }
+
+    function restartGame() {
+      location.reload();
+    }
+
+    window.onload = updateTurnDisplay;
+  </script>
+
 </body>
 </html>
