@@ -128,57 +128,79 @@
   </div>
 
   <script>
-    let cards = [
-      "Blue-Eyes White Dragon",
-      "Dark Magician",
-      "Red-Eyes Black Dragon"
-    ];
+  let cards = [
+    "Blue-Eyes White Dragon",
+    "Dark Magician",
+    "Red-Eyes Black Dragon"
+  ];
 
-    let drawSound = new Audio("draw.mp3");
-    let attackSound = new Audio("attack.mp3");
+  let drawSound = new Audio("draw.mp3");
+  let attackSound = new Audio("attack.mp3");
 
-    drawSound.volume = 0.5;
-    attackSound.volume = 0.7;
+  drawSound.volume = 0.5;
+  attackSound.volume = 0.7;
 
-    function drawCard() {
-      let card = document.getElementById("card");
-      let front = document.getElementById("cardFront");
+  function drawCard() {
+    let card = document.getElementById("card");
+    let front = document.getElementById("cardFront");
 
-      let random = cards[Math.floor(Math.random() * cards.length)];
+    let random = cards[Math.floor(Math.random() * cards.length)];
 
-      // reset flip
-      card.classList.remove("flip");
-      card.classList.remove("glow");
+    card.classList.remove("flip", "glow");
 
-      setTimeout(() => {
-        front.innerText = random;
-        card.classList.add("flip");
-        card.classList.add("glow");
-      }, 200);
+    setTimeout(() => {
+      front.innerText = random;
+      card.classList.add("flip", "glow");
+    }, 200);
 
-      drawSound.currentTime = 0;
-      drawSound.play();
-    }
+    drawSound.currentTime = 0;
+    drawSound.play();
+  }
 
-    function attack() {
-      let enemyLP = document.getElementById("enemyLP");
-      let body = document.getElementById("body");
+  function attack() {
+    let enemyLP = document.getElementById("enemyLP");
+    let body = document.getElementById("body");
 
-      let value = parseInt(enemyLP.innerText);
+    let value = parseInt(enemyLP.innerText);
+    value -= 500;
+    if (value < 0) value = 0;
 
-      value -= 500;
-      if (value < 0) value = 0;
+    enemyLP.innerText = value;
 
-      enemyLP.innerText = value;
+    body.classList.add("shake");
+    setTimeout(() => body.classList.remove("shake"), 300);
 
-      // 💥 shake effect
-      body.classList.add("shake");
-      setTimeout(() => body.classList.remove("shake"), 300);
+    attackSound.currentTime = 0;
+    attackSound.play();
 
-      attackSound.currentTime = 0;
-      attackSound.play();
-    }
-  </script>
+    // 🤖 Enemy turn after delay
+    setTimeout(enemyTurn, 1000);
+  }
+
+  function enemyTurn() {
+    let playerLP = document.getElementById("playerLP");
+    let body = document.getElementById("body");
+
+    let value = parseInt(playerLP.innerText);
+
+    // random damage
+    let damage = Math.floor(Math.random() * 400) + 300;
+
+    value -= damage;
+    if (value < 0) value = 0;
+
+    playerLP.innerText = value;
+
+    // screen shake again
+    body.classList.add("shake");
+    setTimeout(() => body.classList.remove("shake"), 300);
+
+    attackSound.currentTime = 0;
+    attackSound.play();
+
+    alert("Enemy attacks! -" + damage + " LP");
+  }
+</script>
 
 </body>
 </html>
