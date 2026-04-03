@@ -43,8 +43,11 @@
       height: 220px;
       background: black;
       border: 2px solid gold;
-      display: inline-block;
-      line-height: 220px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
       transition: 0.3s;
       cursor: pointer;
     }
@@ -88,37 +91,39 @@
   </div>
 
   <script>
-  
-  let cards = [
-    "Blue-Eyes White Dragon",
-    "Dark Magician",
-    "Red-Eyes Black Dragon"
-  ];
+    let cards = [
+      "Blue-Eyes White Dragon",
+      "Dark Magician",
+      "Red-Eyes Black Dragon"
+    ];
 
-  let drawSound = new Audio("draw.mp3");
-  let attackSound = new Audio("attack.mp3");
+    let drawSound = new Audio("draw.mp3");
+    let attackSound = new Audio("attack.mp3");
 
-  function drawCard() {
-    let random = cards[Math.floor(Math.random() * cards.length)];
-    document.getElementById("cardZone").innerText = random;
-
-    drawSound.currentTime = 0;
-    drawSound.play();
     drawSound.volume = 0.5;
-  }
-
-  function attack() {
-    let enemyLP = document.getElementById("enemyLP");
-    let value = parseInt(enemyLP.innerText);
-
-    value -= 500;
-    if (value < 0) value = 0;
-
-    enemyLP.innerText = value;
-
-    attackSound.currentTime = 0;
-    attackSound.play();
     attackSound.volume = 0.7;
-  }
-</script>
 
+    function drawCard() {
+      let random = cards[Math.floor(Math.random() * cards.length)];
+      document.getElementById("cardZone").innerText = random;
+
+      drawSound.currentTime = 0;
+      drawSound.play();
+    }
+
+    function attack() {
+      let enemyLP = document.getElementById("enemyLP");
+      let value = parseInt(enemyLP.innerText);
+
+      value -= 500;
+      if (value < 0) value = 0;
+
+      enemyLP.innerText = value;
+
+      attackSound.currentTime = 0;
+      attackSound.play();
+    }
+  </script>
+
+</body>
+</html>
