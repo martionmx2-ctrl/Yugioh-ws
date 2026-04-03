@@ -1,31 +1,114 @@
-<script>
-  let cards = [
-    "Blue-Eyes White Dragon",
-    "Dark Magician",
-    "Red-Eyes Black Dragon"
-  ];
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Duel Interface</title>
 
-  let drawSound = new Audio("draw.mp3");
-  let attackSound = new Audio("attack.mp3");
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle, #000 40%, #020024 100%);
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
 
-  function drawCard() {
-    let random = cards[Math.floor(Math.random() * cards.length)];
-    document.getElementById("cardZone").innerText = random;
+    nav {
+      background: black;
+      padding: 15px;
+      border-bottom: 2px solid cyan;
+    }
 
-    drawSound.currentTime = 0;
-    drawSound.play();
-  }
+    nav a {
+      color: cyan;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
 
-  function attack() {
-    let enemyLP = document.getElementById("enemyLP");
-    let value = parseInt(enemyLP.innerText);
+    .arena {
+      margin-top: 30px;
+    }
 
-    value -= 500;
-    if (value < 0) value = 0;
+    .lp {
+      font-size: 24px;
+      margin: 10px;
+    }
 
-    enemyLP.innerText = value;
+    .card-zone {
+      margin-top: 40px;
+    }
 
-    attackSound.currentTime = 0;
-    attackSound.play();
-  }
-</script>
+    .card {
+      width: 150px;
+      height: 220px;
+      background: black;
+      border: 2px solid gold;
+      display: inline-block;
+      line-height: 220px;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px gold;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: cyan;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <a href="index.html">Duel</a>
+    <a href="deck.html">Deck</a>
+    <a href="about.html">About</a>
+  </nav>
+
+  <h1>⚡ DUEL ARENA ⚡</h1>
+
+  <div class="arena">
+    <div class="lp">Your LP: <span id="playerLP">4000</span></div>
+    <div class="lp">Enemy LP: <span id="enemyLP">4000</span></div>
+  </div>
+
+  <button onclick="drawCard()">Draw Card</button>
+  <button onclick="attack()">Attack</button>
+
+  <div class="card-zone">
+    <div class="card" id="cardZone">?</div>
+  </div>
+
+  <script>
+    let cards = [
+      "Blue-Eyes White Dragon",
+      "Dark Magician",
+      "Red-Eyes Black Dragon"
+    ];
+
+    function drawCard() {
+      let random = cards[Math.floor(Math.random() * cards.length)];
+      document.getElementById("cardZone").innerText = random;
+    }
+
+    function attack() {
+      let enemyLP = document.getElementById("enemyLP");
+      let value = parseInt(enemyLP.innerText);
+
+      value -= 500;
+      if (value < 0) value = 0;
+
+      enemyLP.innerText = value;
+    }
+  </script>
+
+</body>
+</html>
