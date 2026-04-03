@@ -51,6 +51,11 @@
       justify-content: center;
       cursor: pointer;
       background: rgba(0,0,0,0.7);
+      background-size: cover;
+      background-position: center;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
       white-space: pre-line;
       text-align: center;
     }
@@ -138,10 +143,22 @@
 
   <script>
     let cards = [
-      { name: "Blue-Eyes White Dragon", atk: 3000 },
-      { name: "Dark Magician", atk: 2500 },
-      { name: "Red-Eyes Black Dragon", atk: 2400 }
-    ];
+  {
+    name: "Blue-Eyes White Dragon",
+    atk: 3000,
+    img: "https://images.ygoprodeck.com/images/cards/89631139.jpg"
+  },
+  {
+    name: "Dark Magician",
+    atk: 2500,
+    img: "https://images.ygoprodeck.com/images/cards/46986414.jpg"
+  },
+  {
+    name: "Red-Eyes Black Dragon",
+    atk: 2400,
+    img: "https://images.ygoprodeck.com/images/cards/74677422.jpg"
+  }
+];
 
     let currentCard = null;
     let playerField = [null, null, null];
@@ -186,9 +203,10 @@
 
       playerField[index] = currentCard;
 
-      document.getElementById("playerField").children[index].innerText =
-        currentCard.name + "\nATK: " + currentCard.atk;
+      let zone = document.getElementById("playerField").children[index];
 
+      zone.style.backgroundImage = `url(${currentCard.img})`;
+      zone.innerText = "ATK: " + currentCard.atk;
       currentCard = null;
     }
 
@@ -227,8 +245,10 @@
 
       if (!enemyField[index]) {
         enemyField[index] = card;
-        document.getElementById("enemy" + index).innerText =
-          card.name + "\nATK: " + card.atk;
+        let zone = document.getElementById("enemy" + index);
+
+        zone.style.backgroundImage = `url(${card.img})`;
+        zone.innerText = "ATK: " + card.atk;
       }
 
       let totalAtk = enemyField.reduce((sum, c) => sum + (c ? c.atk : 0), 0);
