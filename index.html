@@ -166,62 +166,97 @@
 </div>
 
 <script>
-let cards = [
+/* 🃏 BASE CARDS */
+let baseCards = [
   {name:"Blue-Eyes", atk:3000, img:"https://images.ygoprodeck.com/images/cards/89631139.jpg"},
   {name:"Dark Magician", atk:2500, img:"https://images.ygoprodeck.com/images/cards/46986414.jpg"},
   {name:"Red-Eyes", atk:2400, img:"https://images.ygoprodeck.com/images/cards/74677422.jpg"}
 ];
 
-let hand=[], selected=null;
+/* 🧠 GAME STATE */
+let deck = [];
+let hand = [], selected = null;
 let playerField=[null,null,null];
 let enemyField=[null,null,null];
 
 let playerTurn=true, gameOver=false;
 
+/* 🧩 BUILD DECK */
+function buildDeck(){
+  deck = [];
+
+  baseCards.forEach(card=>{
+    for(let i=0;i<5;i++){
+      deck.push({...card});
+    }
+  });
+
+  shuffleDeck();
+}
+
+/* 🔀 SHUFFLE */
+function shuffleDeck(){
+  for(let i=deck.length-1;i>0;i--){
+    let j=Math.floor(Math.random()*(i+1));
+    [deck[i],deck[j]]=[deck[j],deck[i]];
+  }
+}
+
 /* 🔄 TURN DISPLAY */
-function updateTurnText() {
+function updateTurnText(){
   document.getElementById("turnText").innerText =
     playerTurn ? "Your Turn" : "Enemy Turn";
 }
 
-/* 🎴 START GAME (DRAW 5 WITH ANIMATION) */
-function startGame() {
-  let count = 0;
+/* 🎴 START GAME */
+function startGame(){
+  buildDeck();
 
-  let interval = setInterval(() => {
-    let card = cards[Math.floor(Math.random()*cards.length)];
+  let count=0;
+
+  let interval=setInterval(()=>{
+    if(deck.length===0){
+      clearInterval(interval);
+      return;
+    }
+
+    let card=deck.pop();
     hand.push(card);
 
-    // animation
-    let anim = document.createElement("div");
-    anim.className = "draw-anim";
-    anim.style.backgroundImage = `url(${card.img})`;
+    let anim=document.createElement("div");
+    anim.className="draw-anim";
+    anim.style.backgroundImage=`url(${card.img})`;
     document.body.appendChild(anim);
 
-    setTimeout(() => anim.remove(), 600);
+    setTimeout(()=>anim.remove(),600);
 
     renderHand();
 
     count++;
-    if (count >= 5) clearInterval(interval);
-  }, 300);
+    if(count>=5) clearInterval(interval);
+  },300);
 
-  // enemy starting field
-  for (let i = 0; i < 2; i++) {
-    let card = cards[Math.floor(Math.random()*cards.length)];
-    enemyField[i] = card;
+  // enemy start
+  for(let i=0;i<2;i++){
+    let card=baseCards[Math.floor(Math.random()*baseCards.length)];
+    enemyField[i]=card;
 
-    let zone = document.getElementById("enemy"+i);
-    zone.style.backgroundImage = `url(${card.img})`;
-    zone.innerText = "ATK:"+card.atk;
+    let zone=document.getElementById("enemy"+i);
+    zone.style.backgroundImage=`url(${card.img})`;
+    zone.innerText="ATK:"+card.atk;
   }
 }
 
-/* 🎴 DRAW CARD */
+/* 🎴 DRAW */
 function drawCard(){
-  if(!playerTurn || gameOver) return;
+  if(!playerTurn||gameOver) return;
 
-  let card = cards[Math.floor(Math.random()*cards.length)];
+  if(deck.length===0){
+    alert("No cards left!");
+    return;
+  }
+
+  let card=deck.pop();
   hand.push(card);
 
   let anim=document.createElement("div");
@@ -235,7 +270,7 @@ function drawCard(){
   },600);
 }
 
-/* 🖐️ HAND RENDER */
+/* 🖐️ HAND */
 function renderHand(){
   let h=document.getElementById("hand");
   h.innerHTML="";
@@ -256,9 +291,9 @@ function renderHand(){
   });
 }
 
-/* 📥 PLACE CARD */
+/* 📥 PLACE */
 function placeCard(i){
-  if(gameOver || selected===null || playerField[i]) return;
+  if(gameOver||selected===null||playerField[i]) return;
 
   let card=hand[selected];
   playerField[i]=card;
@@ -275,7 +310,7 @@ function placeCard(i){
 
 /* ⚔️ ATTACK */
 function attack(){
-  if(!playerTurn || gameOver) return;
+  if(!playerTurn||gameOver) return;
 
   let dmg=playerField.reduce((s,c)=>s+(c?c.atk:0),0);
 
@@ -291,12 +326,12 @@ function attack(){
   }
 }
 
-/* 🤖 ENEMY TURN */
+/* 🤖 ENEMY */
 function enemyTurn(){
   if(gameOver) return;
 
   let i=Math.floor(Math.random()*3);
-  let card=cards[Math.floor(Math.random()*cards.length)];
+  let card=baseCards[Math.floor(Math.random()*baseCards.length)];
   enemyField[i]=card;
 
   let zone=document.getElementById("enemy"+i);
@@ -314,7 +349,7 @@ function enemyTurn(){
   updateTurnText();
 }
 
-/* 🏁 GAME CHECK */
+/* 🏁 CHECK */
 function checkGame(){
   let p=parseInt(document.getElementById("playerLP").innerText);
   let e=parseInt(document.getElementById("enemyLP").innerText);
@@ -336,11 +371,10 @@ function restartGame(){
 }
 
 /* 🚀 INIT */
-window.onload = function(){
+window.onload=function(){
   startGame();
   updateTurnText();
 };
 </script>
-
 </body>
 </html>
