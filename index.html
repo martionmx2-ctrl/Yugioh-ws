@@ -79,6 +79,35 @@
       cursor: pointer;
     }
 
+    .draw-anim {
+     position: fixed;
+     top: 40%;
+     left: 50%;
+     width: 100px;
+     height: 140px;
+     background-size: cover;
+     background-position: center;
+     transform: translate(-50%, -50%) scale(0.5);
+     opacity: 0;
+     z-index: 1000;
+     animation: drawCardAnim 0.6s ease-out forwards;
+   }
+
+   @keyframes drawCardAnim {
+     0% {
+       transform: translate(-50%, -50%) scale(0.5);
+       opacity: 0;
+     }
+     50% {
+       transform: translate(-50%, -60%) scale(1.2);
+       opacity: 1;
+     }
+     100% {
+       transform: translate(-50%, 200%) scale(0.6);
+       opacity: 0;
+     }
+   }
+
     .selected {
       box-shadow: 0 0 20px yellow;
     }
@@ -144,11 +173,22 @@ let playerTurn = true;
 let gameOver = false;
 
 function drawCard(){
-  if(!playerTurn) return;
+  if(!playerTurn || gameOver) return;
 
   let card = cards[Math.floor(Math.random()*cards.length)];
   hand.push(card);
-  renderHand();
+
+  // 🎴 create animation card
+  let anim = document.createElement("div");
+  anim.className = "draw-anim";
+  anim.style.backgroundImage = `url(${card.img})`;
+
+  document.body.appendChild(anim);
+
+  setTimeout(() => {
+    anim.remove();
+    renderHand();
+  }, 600);
 }
 
 function renderHand(){
