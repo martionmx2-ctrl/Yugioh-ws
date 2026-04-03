@@ -166,6 +166,29 @@
 </div>
 
 <script>
+
+function startGame() {
+  // draw 5 cards for player
+  for (let i = 0; i < 5; i++) {
+    let card = cards[Math.floor(Math.random() * cards.length)];
+    hand.push(card);
+  }
+
+  renderHand();
+
+  // optional: give enemy starting field (feels better)
+  for (let i = 0; i < 2; i++) {
+    let index = i;
+    let card = cards[Math.floor(Math.random() * cards.length)];
+
+    enemyField[index] = card;
+
+    let zone = document.getElementById("enemy" + index);
+    zone.style.backgroundImage = `url(${card.img})`;
+    zone.innerText = "ATK:" + card.atk;
+  }
+}
+  
 let cards = [
   {name:"Blue-Eyes", atk:3000, img:"https://images.ygoprodeck.com/images/cards/89631139.jpg"},
   {name:"Dark Magician", atk:2500, img:"https://images.ygoprodeck.com/images/cards/46986414.jpg"},
@@ -272,6 +295,10 @@ function end(msg){
 function restartGame(){
   location.reload();
 }
+
+  window.onload = function() {
+  startGame();
+};
 </script>
 
 </body>
