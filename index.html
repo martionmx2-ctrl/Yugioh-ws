@@ -26,7 +26,7 @@
     }
 
     .lp {
-      font-size: 24px;
+      font-size: 20px;
       margin: 10px;
     }
 
@@ -79,231 +79,178 @@
       cursor: pointer;
     }
 
-    .draw-anim {
-     position: fixed;
-     top: 40%;
-     left: 50%;
-     width: 100px;
-     height: 140px;
-     background-size: cover;
-     background-position: center;
-     transform: translate(-50%, -50%) scale(0.5);
-     opacity: 0;
-     z-index: 1000;
-     animation: drawCardAnim 0.6s ease-out forwards;
-   }
-
-    .game-over {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, black 40%, #020024 100%);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  animation: fadeIn 0.5s ease-in forwards;
-}
-
-.game-over-content {
-  text-align: center;
-  animation: scaleIn 0.5s ease;
-}
-
-.game-over h1 {
-  font-size: 60px;
-  margin-bottom: 20px;
-  text-shadow: 0 0 20px cyan, 0 0 40px cyan;
-}
-
-.game-over button {
-  padding: 15px 30px;
-  font-size: 18px;
-  background: cyan;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: 0.3s;
-}
-
-.game-over button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 20px cyan;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.7); }
-  to { transform: scale(1); }
-}
-
-   @keyframes drawCardAnim {
-     0% {
-       transform: translate(-50%, -50%) scale(0.5);
-       opacity: 0;
-     }
-     50% {
-       transform: translate(-50%, -60%) scale(1.2);
-       opacity: 1;
-     }
-     100% {
-       transform: translate(-50%, 200%) scale(0.6);
-       opacity: 0;
-     }
-   }
-
     .selected {
       box-shadow: 0 0 20px yellow;
+    }
+
+    /* DRAW ANIMATION */
+    .draw-anim {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      width: 100px;
+      height: 140px;
+      background-size: cover;
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
+      z-index: 1000;
+      animation: drawCardAnim 0.6s ease-out forwards;
+      box-shadow: 0 0 25px cyan;
+    }
+
+    @keyframes drawCardAnim {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      50% { transform: translate(-50%, -60%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, 200%) scale(0.6); opacity: 0; }
+    }
+
+    /* GAME OVER */
+    .game-over {
+      position: fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:none;
+      justify-content:center;
+      align-items:center;
+      background: radial-gradient(circle, black 40%, #020024 100%);
+      z-index:2000;
+    }
+
+    .game-over h1 {
+      font-size:60px;
+      text-shadow:0 0 20px cyan;
+    }
+
+    .game-over button {
+      padding:15px 30px;
+      font-size:18px;
     }
   </style>
 </head>
 
 <body>
 
-  <nav>
-    <a href="index.html">Duel</a>
-  </nav>
+<h1>⚡ DUEL ARENA ⚡</h1>
+<h2 id="turnText">Your Turn</h2>
 
-  <h1>⚡ DUEL ARENA ⚡</h1>
-  <h2 id="turnText">Your Turn</h2>
+<div class="lp">
+  You: <span id="playerLP">4000</span> |
+  Enemy: <span id="enemyLP">4000</span>
+</div>
 
+<button onclick="drawCard()">Draw Card</button>
+<button onclick="attack()">Attack</button>
+
+<h2>Your Hand</h2>
+<div id="hand" class="hand"></div>
+
+<h2>Your Field</h2>
+<div class="field" id="playerField">
+  <div class="zone" onclick="placeCard(0)"></div>
+  <div class="zone" onclick="placeCard(1)"></div>
+  <div class="zone" onclick="placeCard(2)"></div>
+</div>
+
+<h2>Enemy Field</h2>
+<div class="field">
+  <div class="zone" id="enemy0"></div>
+  <div class="zone" id="enemy1"></div>
+  <div class="zone" id="enemy2"></div>
+</div>
+
+<div id="gameOverScreen" class="game-over">
   <div>
-    Your LP: <span id="playerLP">4000</span> |
-    Enemy LP: <span id="enemyLP">4000</span>
-  </div>
-
-  <button onclick="drawCard()">Draw Card</button>
-  <button onclick="attack()">Attack</button>
-
-  <!-- HAND -->
-  <h2>Your Hand</h2>
-  <div id="hand" class="hand"></div>
-
-  <!-- PLAYER FIELD -->
-  <h2>Your Field</h2>
-  <div class="field" id="playerField">
-    <div class="zone" onclick="placeCard(0)"></div>
-    <div class="zone" onclick="placeCard(1)"></div>
-    <div class="zone" onclick="placeCard(2)"></div>
-  </div>
-
-  <!-- ENEMY FIELD -->
-  <h2>Enemy Field</h2>
-  <div class="field">
-    <div class="zone" id="enemy0"></div>
-    <div class="zone" id="enemy1"></div>
-    <div class="zone" id="enemy2"></div>
-  </div>
-
-  <!-- GAME OVER -->
-  <div id="gameOverScreen" class="game-over">
-  <div class="game-over-content">
     <h1 id="gameResult"></h1>
-    <button onclick="restartGame()">🔁 Restart Duel</button>
+    <button onclick="restartGame()">Restart Duel</button>
   </div>
 </div>
+
 <script>
 let cards = [
-  { name: "Blue-Eyes", atk: 3000, img: "https://images.ygoprodeck.com/images/cards/89631139.jpg" },
-  { name: "Dark Magician", atk: 2500, img: "https://images.ygoprodeck.com/images/cards/46986414.jpg" },
-  { name: "Red-Eyes", atk: 2400, img: "https://images.ygoprodeck.com/images/cards/74677422.jpg" }
+  {name:"Blue-Eyes", atk:3000, img:"https://images.ygoprodeck.com/images/cards/89631139.jpg"},
+  {name:"Dark Magician", atk:2500, img:"https://images.ygoprodeck.com/images/cards/46986414.jpg"},
+  {name:"Red-Eyes", atk:2400, img:"https://images.ygoprodeck.com/images/cards/74677422.jpg"}
 ];
 
-let hand = [];
-let selectedCardIndex = null;
-let playerField = [null,null,null];
-let enemyField = [null,null,null];
+let hand=[], selected=null;
+let playerField=[null,null,null];
+let enemyField=[null,null,null];
 
-let playerTurn = true;
-let gameOver = false;
+let playerTurn=true, gameOver=false;
 
 function drawCard(){
-  if(!playerTurn || gameOver) return;
+  if(!playerTurn||gameOver) return;
 
-  let card = cards[Math.floor(Math.random()*cards.length)];
+  let card=cards[Math.floor(Math.random()*cards.length)];
   hand.push(card);
 
-  // 🎴 create animation card
-  let anim = document.createElement("div");
-  anim.className = "draw-anim";
-  anim.style.backgroundImage = `url(${card.img})`;
-
+  let anim=document.createElement("div");
+  anim.className="draw-anim";
+  anim.style.backgroundImage=`url(${card.img})`;
   document.body.appendChild(anim);
 
-  setTimeout(() => {
+  setTimeout(()=>{
     anim.remove();
     renderHand();
-  }, 600);
+  },600);
 }
 
 function renderHand(){
-  let handDiv = document.getElementById("hand");
-  handDiv.innerHTML="";
-
-  hand.forEach((card,i)=>{
-    let div=document.createElement("div");
-    div.className="hand-card";
-    div.style.backgroundImage=`url(${card.img})`;
-
-    if(i===selectedCardIndex) div.classList.add("selected");
-
-    div.onclick=()=>{
-      selectedCardIndex=i;
-      renderHand();
-    };
-
-    handDiv.appendChild(div);
+  let h=document.getElementById("hand");
+  h.innerHTML="";
+  hand.forEach((c,i)=>{
+    let d=document.createElement("div");
+    d.className="hand-card";
+    d.style.backgroundImage=`url(${c.img})`;
+    if(i===selected) d.classList.add("selected");
+    d.onclick=()=>{selected=i;renderHand();}
+    h.appendChild(d);
   });
 }
 
 function placeCard(i){
-  if(selectedCardIndex===null) return;
+  if(gameOver||selected===null||playerField[i]) return;
 
-  let card=hand[selectedCardIndex];
+  let card=hand[selected];
   playerField[i]=card;
 
   let zone=document.getElementById("playerField").children[i];
   zone.style.backgroundImage=`url(${card.img})`;
   zone.innerText="ATK:"+card.atk;
 
-  hand.splice(selectedCardIndex,1);
-  selectedCardIndex=null;
-
+  hand.splice(selected,1);
+  selected=null;
   renderHand();
 }
 
 function attack(){
-  let total=playerField.reduce((s,c)=>s+(c?c.atk:0),0);
+  if(!playerTurn||gameOver) return;
 
-  let enemyLP=document.getElementById("enemyLP");
-  enemyLP.innerText=Math.max(0,enemyLP.innerText-total);
+  let dmg=playerField.reduce((s,c)=>s+(c?c.atk:0),0);
+  let e=document.getElementById("enemyLP");
+  e.innerText=Math.max(0,e.innerText-dmg);
 
   checkGame();
-
-  playerTurn=false;
-  setTimeout(enemyTurn,1000);
+  if(!gameOver){
+    playerTurn=false;
+    setTimeout(enemyTurn,1000);
+  }
 }
 
 function enemyTurn(){
+  if(gameOver) return;
+
   let i=Math.floor(Math.random()*3);
   let card=cards[Math.floor(Math.random()*cards.length)];
-
   enemyField[i]=card;
 
-  let zone=document.getElementById("enemy"+i);
-  zone.style.backgroundImage=`url(${card.img})`;
-  zone.innerText="ATK:"+card.atk;
+  let z=document.getElementById("enemy"+i);
+  z.style.backgroundImage=`url(${card.img})`;
+  z.innerText="ATK:"+card.atk;
 
-  let total=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
-
-  let playerLP=document.getElementById("playerLP");
-  playerLP.innerText=Math.max(0,playerLP.innerText-total);
+  let dmg=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
+  let p=document.getElementById("playerLP");
+  p.innerText=Math.max(0,p.innerText-dmg);
 
   checkGame();
   playerTurn=true;
@@ -312,19 +259,18 @@ function enemyTurn(){
 function checkGame(){
   let p=parseInt(playerLP.innerText);
   let e=parseInt(enemyLP.innerText);
-
   if(e<=0) end("YOU WIN");
   if(p<=0) end("YOU LOSE");
 }
 
 function end(msg){
-  gameOver = true;
+  gameOver=true;
+  document.getElementById("gameResult").innerText=msg;
+  document.getElementById("gameOverScreen").style.display="flex";
+}
 
-  let screen = document.getElementById("gameOverScreen");
-  let text = document.getElementById("gameResult");
-
-  text.innerText = msg;
-  screen.style.display = "flex";
+function restartGame(){
+  location.reload();
 }
 </script>
 
