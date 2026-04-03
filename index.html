@@ -148,10 +148,12 @@
   
   <script>
   let cards = [
-    "Blue-Eyes White Dragon",
-    "Dark Magician",
-    "Red-Eyes Black Dragon"
+    { name: "Blue-Eyes White Dragon", atk: 3000 },
+    { name: "Dark Magician", atk: 2500 },
+    { name: "Red-Eyes Black Dragon", atk: 2400 }
   ];
+
+  let currentCard = null;
 
   let drawSound = new Audio("draw.mp3");
   let attackSound = new Audio("attack.mp3");
@@ -173,12 +175,12 @@
     let card = document.getElementById("card");
     let front = document.getElementById("cardFront");
 
-    let random = cards[Math.floor(Math.random() * cards.length)];
+    currentCard = cards[Math.floor(Math.random() * cards.length)];
 
     card.classList.remove("flip", "glow");
 
     setTimeout(() => {
-      front.innerText = random;
+      front.innerText = currentCard.name + "\nATK: " + currentCard.atk;
       card.classList.add("flip", "glow");
     }, 200);
 
@@ -189,11 +191,19 @@
   function attack() {
     if (!playerTurn || gameOver) return;
 
+    if (!currentCard) {
+      alert("Draw a card first!");
+      return;
+    }
+
     let enemyLP = document.getElementById("enemyLP");
     let body = document.getElementById("body");
 
     let value = parseInt(enemyLP.innerText);
-    value -= 500;
+
+    // ⚔️ damage based on ATK
+    value -= currentCard.atk;
+
     if (value < 0) value = 0;
 
     enemyLP.innerText = value;
@@ -219,10 +229,12 @@
     let playerLP = document.getElementById("playerLP");
     let body = document.getElementById("body");
 
-    let value = parseInt(playerLP.innerText);
-    let damage = Math.floor(Math.random() * 400) + 300;
+    // enemy draws random card
+    let enemyCard = cards[Math.floor(Math.random() * cards.length)];
 
-    value -= damage;
+    let value = parseInt(playerLP.innerText);
+    value -= enemyCard.atk;
+
     if (value < 0) value = 0;
 
     playerLP.innerText = value;
@@ -232,6 +244,8 @@
 
     attackSound.currentTime = 0;
     attackSound.play();
+
+    alert("Enemy summons " + enemyCard.name + " (" + enemyCard.atk + " ATK)");
 
     checkGameState();
 
