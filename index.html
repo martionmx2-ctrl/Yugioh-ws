@@ -318,9 +318,13 @@ function checkGame(){
 }
 
 function end(msg){
-  gameOver=true;
-  document.getElementById("gameOverScreen").style.display="block";
-  document.getElementById("gameResult").innerText=msg;
+  gameOver = true;
+
+  let screen = document.getElementById("gameOverScreen");
+  let text = document.getElementById("gameResult");
+
+  text.innerText = msg;
+  screen.style.display = "flex";
 }
 </script>
 
