@@ -417,10 +417,9 @@
 </div>
 
 <script>
-/* 🃏 BASE CARDS */
-let baseCards = [];
 
 /* 🧠 GAME STATE */
+let baseCards = [];
 let deck = [];
 let hand = [], selected = null;
 let playerField=[null,null,null];
@@ -428,34 +427,31 @@ let enemyField=[null,null,null];
 
 let playerTurn=true, gameOver=false;
 
+/* 🌐 API FUNCTION */
+async function getCard(name){
+  let res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
+  let data = await res.json();
+  let c = data.data[0];
+
+  return {
+    name: c.name,
+    atk: c.atk || 0,
+    def: c.def || 0,
+    img: c.card_images[0].image_url
+  };
+}
+
 /* 🧩 BUILD DECK */
 function buildDeck(){
   deck = [];
-
   baseCards.forEach(card=>{
     for(let i=0;i<5;i++){
       deck.push({...card});
     }
   });
-
   shuffleDeck();
 }
 
-  /* API FUNCTION */
-  async function getCard(name){
-  let res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
-  let data = await res.json();
-
-  let card = data.data[0];
-
-  return {
-    name: card.name,
-    atk: card.atk || 0,
-    def: card.def || 0,
-    img: card.card_images[0].image_url
-  };
-}
-  0
 /* 🔀 SHUFFLE */
 function shuffleDeck(){
   for(let i=deck.length-1;i>0;i--){
@@ -464,72 +460,57 @@ function shuffleDeck(){
   }
 }
 
-/* 🔄 TURN DISPLAY */
+/* 🔄 TURN TEXT */
 function updateTurnText(){
   document.getElementById("turnText").innerText =
     playerTurn ? "Your Turn" : "Enemy Turn";
 }
 
-/* 🎴 START GAME */
-function startGame(){
+/* 🎴 START GAME (FIXED) */
+async function startGame(){
+
+  baseCards = [
+    await getCard("Blue-Eyes White Dragon"),
+    await getCard("Dark Magician"),
+    await getCard("Red-Eyes Black Dragon"),
+    await getCard("Cyber Dragon"),
+    await getCard("Summoned Skull")
+  ];
+
   buildDeck();
 
-  let count=0;
+  // draw starting hand
+  for(let i=0;i<5;i++){
+    drawCard();
+  }
 
-  let interval=setInterval(()=>{
-    if(deck.length===0){
-      clearInterval(interval);
-      return;
-    }
-
-    let card=deck.pop();
-    hand.push(card);
-
-    let anim=document.createElement("div");
-    anim.className="draw-anim";
-    anim.style.backgroundImage=`url(${card.img})`;
-    document.body.appendChild(anim);
-
-    setTimeout(()=>anim.remove(),600);
-
-    renderHand();
-
-    count++;
-    if(count>=5) clearInterval(interval);
-  },300);
-
-  // enemy start
+  // enemy setup
   for(let i=0;i<2;i++){
-    let card=baseCards[Math.floor(Math.random()*baseCards.length)];
+    let card = baseCards[Math.floor(Math.random()*baseCards.length)];
     enemyField[i]=card;
-
-    let zone=document.getElementById("enemy"+i);
-    zone.style.backgroundImage=`url(${card.img})`;
-    zone.innerText="ATK:"+card.atk;
+    renderEnemyField();
   }
 }
 
 /* 🎴 DRAW */
 function drawCard(){
   if(!playerTurn||gameOver) return;
-
-  if(deck.length===0){
-    alert("No cards left!");
-    return;
-  }
+  if(deck.length===0) return;
 
   let card=deck.pop();
   hand.push(card);
 
+  playAnim(card.img);
+  renderHand();
+}
+
+/* 🎬 ANIMATION */
+function playAnim(img){
   let anim=document.createElement("div");
   anim.className="draw-anim";
-  anim.style.backgroundImage=`url(${card.img})`;
+  anim.style.backgroundImage=`url(${img})`;
   document.body.appendChild(anim);
-
-  setTimeout(()=>{
-    anim.remove();
-    renderHand();
-  },600);
+  setTimeout(()=>anim.remove(),600);
 }
 
 /* 🖐️ HAND */
@@ -558,6 +539,8 @@ function placeCard(i){
   if(gameOver||selected===null||playerField[i]) return;
 
   let card=hand[selected];
+  playAnim(card.img);
+
   playerField[i]=card;
 
   let zone=document.getElementById("playerField").children[i];
@@ -593,12 +576,10 @@ function enemyTurn(){
   if(gameOver) return;
 
   let i=Math.floor(Math.random()*3);
-  let card=baseCards[Math.floor(Math.random()*baseCards.length)];
-  enemyField[i]=card;
+  let card=baseCards.reduce((a,b)=> a.atk>b.atk?a:b); // smarter AI
 
-  let zone=document.getElementById("enemy"+i);
-  zone.style.backgroundImage=`url(${card.img})`;
-  zone.innerText="ATK:"+card.atk;
+  enemyField[i]=card;
+  renderEnemyField();
 
   let dmg=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
 
@@ -609,6 +590,17 @@ function enemyTurn(){
 
   playerTurn=true;
   updateTurnText();
+}
+
+/* 🎯 RENDER ENEMY */
+function renderEnemyField(){
+  for(let i=0;i<3;i++){
+    let zone=document.getElementById("enemy"+i);
+    if(enemyField[i]){
+      zone.style.backgroundImage=`url(${enemyField[i].img})`;
+      zone.innerText="ATK:"+enemyField[i].atk;
+    }
+  }
 }
 
 /* 🏁 CHECK */
@@ -632,11 +624,12 @@ function restartGame(){
   location.reload();
 }
 
-/* 🚀 INIT */
-window.onload=function(){
-  startGame();
+/* 🚀 INIT (FIXED FOR API) */
+window.onload = async function(){
+  await startGame();
   updateTurnText();
 };
+
 </script>
 </body>
 </html>
