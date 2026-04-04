@@ -207,6 +207,215 @@
   </div>
 </div>
 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Duel Interface</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle, #000 40%, #020024 100%);
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    nav {
+      background: black;
+      padding: 15px;
+      border-bottom: 2px solid cyan;
+    }
+
+    nav a {
+      color: cyan;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .lp {
+      font-size: 20px;
+      margin: 10px;
+    }
+
+    .field {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px;
+    }
+
+    .zone {
+     width: 120px;
+     height: 160px;
+     border: 2px solid rgba(0,255,255,0.6);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     background-size: cover;
+     background-position: center;
+     white-space: pre-line;
+     font-size: 12px;
+     position: relative;
+     backdrop-filter: blur(5px);
+     background-color: rgba(0, 255, 255, 0.05);
+     box-shadow: 0 0 10px cyan, inset 0 0 10px cyan;
+     transition: 0.3s;
+   }
+
+   .zone:hover {
+     box-shadow: 0 0 25px cyan, inset 0 0 20px cyan;
+     transform: scale(1.05);
+   }
+
+    .zone:hover {
+      box-shadow: 0 0 15px cyan;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: cyan;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* HAND */
+    .hand {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px;
+    }
+
+    .hand-card {
+      width: 80px;
+      height: 120px;
+      background-size: cover;
+      border: 2px solid gold;
+      cursor: pointer;
+    }
+
+    .selected {
+      box-shadow: 0 0 20px yellow;
+    }
+
+    /* DRAW ANIMATION */
+    .draw-anim {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      width: 100px;
+      height: 140px;
+      background-size: cover;
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
+      z-index: 1000;
+      animation: drawCardAnim 0.6s ease-out forwards;
+      box-shadow: 0 0 25px cyan;
+    }
+
+    @keyframes drawCardAnim {
+      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      50% { transform: translate(-50%, -60%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, 200%) scale(0.6); opacity: 0; }
+    }
+    /* FIELD AREA */
+      .field-grid {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     gap: 10px;
+   }
+   .field-row {
+     display: flex;
+     gap: 20px;
+   }
+    /* GAME OVER */
+    .game-over {
+      position: fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:none;
+      justify-content:center;
+      align-items:center;
+      background: radial-gradient(circle, black 40%, #020024 100%);
+      z-index:2000;
+    }
+
+    .game-over h1 {
+      font-size:60px;
+      text-shadow:0 0 20px cyan;
+    }
+
+    .game-over button {
+      padding:15px 30px;
+      font-size:18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>⚡ DUEL ARENA ⚡</h1>
+<h2 id="turnText">Your Turn</h2>
+
+<div class="lp">
+  You: <span id="playerLP">4000</span> |
+  Enemy: <span id="enemyLP">4000</span>
+</div>
+
+<button onclick="drawCard()">Draw Card</button>
+<button onclick="attack()">Attack</button>
+
+<h2>Your Hand</h2>
+<div id="hand" class="hand"></div>
+
+<h2>Your Field</h2>
+<div class="field-grid">
+
+  <!-- Enemy Spell/Trap -->
+  <div class="field-row">
+    <div class="zone"></div>
+    <div class="zone"></div>
+    <div class="zone"></div>
+  </div>
+
+  <!-- Enemy Monsters -->
+  <div class="field-row">
+    <div class="zone" id="enemy0"></div>
+    <div class="zone" id="enemy1"></div>
+    <div class="zone" id="enemy2"></div>
+  </div>
+
+  <!-- Divider -->
+  <h2>⚔️ BATTLEFIELD ⚔️</h2>
+
+  <!-- Player Monsters -->
+  <div class="field-row" id="playerField">
+    <div class="zone" onclick="placeCard(0)"></div>
+    <div class="zone" onclick="placeCard(1)"></div>
+    <div class="zone" onclick="placeCard(2)"></div>
+  </div>
+
+  <!-- Player Spell/Trap -->
+  <div class="field-row">
+    <div class="zone"></div>
+    <div class="zone"></div>
+    <div class="zone"></div>
+  </div>
+
+</div>
+
+<div id="gameOverScreen" class="game-over">
+  <div>
+    <h1 id="gameResult"></h1>
+    <button onclick="restartGame()">Restart Duel</button>
+  </div>
+</div>
+
 <script>
 /* 🃏 BASE CARDS */
 let baseCards = [
@@ -418,5 +627,7 @@ window.onload=function(){
   updateTurnText();
 };
 </script>
+</body>
+</html>
 </body>
 </html>
