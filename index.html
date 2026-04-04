@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Duel Interface</title>
+  <title>Duel Interface</title>
 
   <style>
     body {
@@ -12,68 +12,45 @@
       text-align: center;
     }
 
-    nav {
-      background: black;
-      padding: 15px;
-      border-bottom: 2px solid cyan;
-    }
-
-    nav a {
-      color: cyan;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
     .lp {
       font-size: 20px;
       margin: 10px;
     }
 
-    .field {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin: 20px;
-    }
-
     .zone {
-     width: 120px;
-     height: 160px;
-     border: 2px solid rgba(0,255,255,0.6);
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     background-size: cover;
-     background-position: center;
-     white-space: pre-line;
-     font-size: 12px;
-     position: relative;
-     backdrop-filter: blur(5px);
-     background-color: rgba(0, 255, 255, 0.05);
-     box-shadow: 0 0 10px cyan, inset 0 0 10px cyan;
-     transition: 0.3s;
-   }
-
-   .zone:hover {
-     box-shadow: 0 0 25px cyan, inset 0 0 20px cyan;
-     transform: scale(1.05);
-   }
+      width: 120px;
+      height: 160px;
+      border: 2px solid rgba(0,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-size: cover;
+      background-position: center;
+      white-space: pre-line;
+      font-size: 12px;
+      backdrop-filter: blur(5px);
+      background-color: rgba(0, 255, 255, 0.05);
+      box-shadow: 0 0 10px cyan, inset 0 0 10px cyan;
+      transition: 0.3s;
+    }
 
     .zone:hover {
-      box-shadow: 0 0 15px cyan;
+      box-shadow: 0 0 25px cyan;
+      transform: scale(1.05);
     }
 
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: cyan;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
+    .field-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
 
-    /* HAND */
+    .field-row {
+      display: flex;
+      gap: 20px;
+    }
+
     .hand {
       display: flex;
       justify-content: center;
@@ -93,7 +70,15 @@
       box-shadow: 0 0 20px yellow;
     }
 
-    /* DRAW ANIMATION */
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: cyan;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
     .draw-anim {
       position: fixed;
       top: 40%;
@@ -112,38 +97,6 @@
       0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
       50% { transform: translate(-50%, -60%) scale(1.2); opacity: 1; }
       100% { transform: translate(-50%, 200%) scale(0.6); opacity: 0; }
-    }
-    /* FIELD AREA */
-      .field-grid {
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     gap: 10px;
-   }
-   .field-row {
-     display: flex;
-     gap: 20px;
-   }
-    /* GAME OVER */
-    .game-over {
-      position: fixed;
-      top:0; left:0;
-      width:100%; height:100%;
-      display:none;
-      justify-content:center;
-      align-items:center;
-      background: radial-gradient(circle, black 40%, #020024 100%);
-      z-index:2000;
-    }
-
-    .game-over h1 {
-      font-size:60px;
-      text-shadow:0 0 20px cyan;
-    }
-
-    .game-over button {
-      padding:15px 30px;
-      font-size:18px;
     }
   </style>
 </head>
@@ -164,15 +117,7 @@
 <h2>Your Hand</h2>
 <div id="hand" class="hand"></div>
 
-<h2>Your Field</h2>
 <div class="field-grid">
-
-  <!-- Enemy Spell/Trap -->
-  <div class="field-row">
-    <div class="zone"></div>
-    <div class="zone"></div>
-    <div class="zone"></div>
-  </div>
 
   <!-- Enemy Monsters -->
   <div class="field-row">
@@ -181,7 +126,6 @@
     <div class="zone" id="enemy2"></div>
   </div>
 
-  <!-- Divider -->
   <h2>⚔️ BATTLEFIELD ⚔️</h2>
 
   <!-- Player Monsters -->
@@ -191,27 +135,11 @@
     <div class="zone" onclick="placeCard(2)"></div>
   </div>
 
-  <!-- Player Spell/Trap -->
-  <div class="field-row">
-    <div class="zone"></div>
-    <div class="zone"></div>
-    <div class="zone"></div>
-  </div>
-
 </div>
-
-<div id="gameOverScreen" class="game-over">
-  <div>
-    <h1 id="gameResult"></h1>
-    <button onclick="restartGame()">Restart Duel</button>
-  </div>
-</div>
-
-
 
 <script>
 
-/* 🧠 GAME STATE */
+/* GAME STATE */
 let baseCards = [];
 let deck = [];
 let hand = [], selected = null;
@@ -220,7 +148,7 @@ let enemyField=[null,null,null];
 
 let playerTurn=true, gameOver=false;
 
-/* 🌐 API FUNCTION */
+/* API */
 async function getCard(name){
   let res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
   let data = await res.json();
@@ -229,12 +157,11 @@ async function getCard(name){
   return {
     name: c.name,
     atk: c.atk || 0,
-    def: c.def || 0,
     img: c.card_images[0].image_url
   };
 }
 
-/* 🧩 BUILD DECK */
+/* BUILD DECK */
 function buildDeck(){
   deck = [];
   baseCards.forEach(card=>{
@@ -242,42 +169,23 @@ function buildDeck(){
       deck.push({...card});
     }
   });
-  shuffleDeck();
 }
 
-/* 🔀 SHUFFLE */
-function shuffleDeck(){
-  for(let i=deck.length-1;i>0;i--){
-    let j=Math.floor(Math.random()*(i+1));
-    [deck[i],deck[j]]=[deck[j],deck[i]];
-  }
-}
-
-/* 🔄 TURN TEXT */
-function updateTurnText(){
-  document.getElementById("turnText").innerText =
-    playerTurn ? "Your Turn" : "Enemy Turn";
-}
-
-/* 🎴 START GAME (FIXED) */
+/* START GAME */
 async function startGame(){
 
   baseCards = [
     await getCard("Blue-Eyes White Dragon"),
     await getCard("Dark Magician"),
-    await getCard("Red-Eyes Black Dragon"),
-    await getCard("Cyber Dragon"),
-    await getCard("Summoned Skull")
+    await getCard("Red-Eyes Black Dragon")
   ];
 
   buildDeck();
 
-  // draw starting hand
   for(let i=0;i<5;i++){
     drawCard();
   }
 
-  // enemy setup
   for(let i=0;i<2;i++){
     let card = baseCards[Math.floor(Math.random()*baseCards.length)];
     enemyField[i]=card;
@@ -285,10 +193,9 @@ async function startGame(){
   }
 }
 
-/* 🎴 DRAW */
+/* DRAW */
 function drawCard(){
-  if(!playerTurn||gameOver) return;
-  if(deck.length===0) return;
+  if(!playerTurn||deck.length===0) return;
 
   let card=deck.pop();
   hand.push(card);
@@ -297,7 +204,7 @@ function drawCard(){
   renderHand();
 }
 
-/* 🎬 ANIMATION */
+/* ANIMATION */
 function playAnim(img){
   let anim=document.createElement("div");
   anim.className="draw-anim";
@@ -306,7 +213,7 @@ function playAnim(img){
   setTimeout(()=>anim.remove(),600);
 }
 
-/* 🖐️ HAND */
+/* HAND */
 function renderHand(){
   let h=document.getElementById("hand");
   h.innerHTML="";
@@ -327,9 +234,9 @@ function renderHand(){
   });
 }
 
-/* 📥 PLACE */
+/* PLACE */
 function placeCard(i){
-  if(gameOver||selected===null||playerField[i]) return;
+  if(selected===null||playerField[i]) return;
 
   let card=hand[selected];
   playAnim(card.img);
@@ -346,30 +253,24 @@ function placeCard(i){
   renderHand();
 }
 
-/* ⚔️ ATTACK */
+/* ATTACK */
 function attack(){
-  if(!playerTurn||gameOver) return;
+  if(!playerTurn) return;
 
   let dmg=playerField.reduce((s,c)=>s+(c?c.atk:0),0);
 
   let enemyLP=document.getElementById("enemyLP");
   enemyLP.innerText=Math.max(0,enemyLP.innerText-dmg);
 
-  checkGame();
-
-  if(!gameOver){
-    playerTurn=false;
-    updateTurnText();
-    setTimeout(enemyTurn,1000);
-  }
+  playerTurn=false;
+  updateTurnText();
+  setTimeout(enemyTurn,1000);
 }
 
-/* 🤖 ENEMY */
+/* ENEMY */
 function enemyTurn(){
-  if(gameOver) return;
-
   let i=Math.floor(Math.random()*3);
-  let card=baseCards.reduce((a,b)=> a.atk>b.atk?a:b); // smarter AI
+  let card=baseCards[Math.floor(Math.random()*baseCards.length)];
 
   enemyField[i]=card;
   renderEnemyField();
@@ -379,13 +280,11 @@ function enemyTurn(){
   let playerLP=document.getElementById("playerLP");
   playerLP.innerText=Math.max(0,playerLP.innerText-dmg);
 
-  checkGame();
-
   playerTurn=true;
   updateTurnText();
 }
 
-/* 🎯 RENDER ENEMY */
+/* RENDER ENEMY */
 function renderEnemyField(){
   for(let i=0;i<3;i++){
     let zone=document.getElementById("enemy"+i);
@@ -396,35 +295,19 @@ function renderEnemyField(){
   }
 }
 
-/* 🏁 CHECK */
-function checkGame(){
-  let p=parseInt(document.getElementById("playerLP").innerText);
-  let e=parseInt(document.getElementById("enemyLP").innerText);
-
-  if(e<=0) end("YOU WIN");
-  if(p<=0) end("YOU LOSE");
+/* TURN TEXT */
+function updateTurnText(){
+  document.getElementById("turnText").innerText =
+    playerTurn ? "Your Turn" : "Enemy Turn";
 }
 
-/* 🏆 END */
-function end(msg){
-  gameOver=true;
-  document.getElementById("gameResult").innerText=msg;
-  document.getElementById("gameOverScreen").style.display="flex";
-}
-
-/* 🔁 RESTART */
-function restartGame(){
-  location.reload();
-}
-
-/* 🚀 INIT (FIXED FOR API) */
+/* INIT */
 window.onload = async function(){
   await startGame();
   updateTurnText();
 };
 
 </script>
-</body>
-</html>
+
 </body>
 </html>
