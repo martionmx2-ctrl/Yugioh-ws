@@ -38,17 +38,27 @@
     }
 
     .zone {
-      width: 120px;
-      height: 160px;
-      border: 2px solid cyan;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-size: cover;
-      background-position: center;
-      white-space: pre-line;
-      font-size: 12px;
-    }
+  width: 120px;
+  height: 160px;
+  border: 2px solid rgba(0,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  white-space: pre-line;
+  font-size: 12px;
+  position: relative;
+  backdrop-filter: blur(5px);
+  background-color: rgba(0, 255, 255, 0.05);
+  box-shadow: 0 0 10px cyan, inset 0 0 10px cyan;
+  transition: 0.3s;
+}
+
+.zone:hover {
+  box-shadow: 0 0 25px cyan, inset 0 0 20px cyan;
+  transform: scale(1.05);
+}
 
     .zone:hover {
       box-shadow: 0 0 15px cyan;
@@ -103,7 +113,17 @@
       50% { transform: translate(-50%, -60%) scale(1.2); opacity: 1; }
       100% { transform: translate(-50%, 200%) scale(0.6); opacity: 0; }
     }
-
+    /* FIELD AREA */
+      .field-grid {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     gap: 10px;
+   }
+   .field-row {
+     display: flex;
+     gap: 20px;
+   }
     /* GAME OVER */
     .game-over {
       position: fixed;
@@ -145,17 +165,39 @@
 <div id="hand" class="hand"></div>
 
 <h2>Your Field</h2>
-<div class="field" id="playerField">
-  <div class="zone" onclick="placeCard(0)"></div>
-  <div class="zone" onclick="placeCard(1)"></div>
-  <div class="zone" onclick="placeCard(2)"></div>
-</div>
+<div class="field-grid">
 
-<h2>Enemy Field</h2>
-<div class="field">
-  <div class="zone" id="enemy0"></div>
-  <div class="zone" id="enemy1"></div>
-  <div class="zone" id="enemy2"></div>
+  <!-- Enemy Spell/Trap -->
+  <div class="field-row">
+    <div class="zone"></div>
+    <div class="zone"></div>
+    <div class="zone"></div>
+  </div>
+
+  <!-- Enemy Monsters -->
+  <div class="field-row">
+    <div class="zone" id="enemy0"></div>
+    <div class="zone" id="enemy1"></div>
+    <div class="zone" id="enemy2"></div>
+  </div>
+
+  <!-- Divider -->
+  <h2>⚔️ BATTLEFIELD ⚔️</h2>
+
+  <!-- Player Monsters -->
+  <div class="field-row" id="playerField">
+    <div class="zone" onclick="placeCard(0)"></div>
+    <div class="zone" onclick="placeCard(1)"></div>
+    <div class="zone" onclick="placeCard(2)"></div>
+  </div>
+
+  <!-- Player Spell/Trap -->
+  <div class="field-row">
+    <div class="zone"></div>
+    <div class="zone"></div>
+    <div class="zone"></div>
+  </div>
+
 </div>
 
 <div id="gameOverScreen" class="game-over">
