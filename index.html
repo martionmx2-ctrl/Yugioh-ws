@@ -418,11 +418,7 @@
 
 <script>
 /* 🃏 BASE CARDS */
-let baseCards = [
-  {name:"Blue-Eyes", atk:3000, img:"https://images.ygoprodeck.com/images/cards/89631139.jpg"},
-  {name:"Dark Magician", atk:2500, img:"https://images.ygoprodeck.com/images/cards/46986414.jpg"},
-  {name:"Red-Eyes", atk:2400, img:"https://images.ygoprodeck.com/images/cards/74677422.jpg"}
-];
+let baseCards = [];
 
 /* 🧠 GAME STATE */
 let deck = [];
@@ -445,6 +441,21 @@ function buildDeck(){
   shuffleDeck();
 }
 
+  /* API FUNCTION */
+  async function getCard(name){
+  let res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
+  let data = await res.json();
+
+  let card = data.data[0];
+
+  return {
+    name: card.name,
+    atk: card.atk || 0,
+    def: card.def || 0,
+    img: card.card_images[0].image_url
+  };
+}
+  0
 /* 🔀 SHUFFLE */
 function shuffleDeck(){
   for(let i=deck.length-1;i>0;i--){
