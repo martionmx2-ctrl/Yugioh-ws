@@ -141,12 +141,15 @@ async function getCard(name){
 }
 
 async function startGame(){
-  baseCards=[
-    await getCard("Blue-Eyes White Dragon"),
-    await getCard("Dark Magician"),
-    await getCard("Mirror Force"),
-    await getCard("Raigeki")
-  ];
+
+  let savedDeck = localStorage.getItem("myDeck");
+
+  if(savedDeck){
+    baseCards = JSON.parse(savedDeck);
+  } else {
+    alert("No deck found! Build one first.");
+    return;
+  }
 
   buildDeck();
 
@@ -156,7 +159,6 @@ async function startGame(){
   renderEnemyField();
   updateTurn();
 }
-
 function buildDeck(){
   deck=[];
   baseCards.forEach(c=>{
