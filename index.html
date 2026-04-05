@@ -36,6 +36,7 @@
       cursor: pointer;
       transition: 0.3s;
       box-shadow: 0 0 10px cyan;
+      position: relative;
     }
 
     .zone:hover { transform: scale(1.05); }
@@ -50,12 +51,35 @@
       cursor:pointer;
     }
 
+    .facedown {
+      background: black !important;
+      border:2px solid purple;
+    }
+
     button {
       padding:10px 20px;
       background:cyan;
       border:none;
       margin:5px;
       cursor:pointer;
+    }
+
+    .summon {
+      position: fixed;
+      top:50%; left:50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity:0;
+      width:200px; height:300px;
+      background-size:cover;
+      box-shadow:0 0 40px cyan;
+      animation: summon 1s forwards;
+      z-index:999;
+    }
+
+    @keyframes summon {
+      0% {opacity:0; transform:translate(-50%,-50%) scale(0.5);}
+      50% {opacity:1; transform:translate(-50%,-60%) scale(1.3);}
+      100% {opacity:0; transform:translate(-50%,200%) scale(0.6);}
     }
   </style>
 </head>
@@ -70,8 +94,7 @@
 </div>
 
 <button onclick="drawCard()">Draw</button>
-<button onclick="attack()">Attack</button>
-<button onclick="searchCard()">Add Card</button>
+<button onclick="attackPhase()">Attack Phase</button>
 
 <h2>Hand</h2>
 <div id="hand" class="hand"></div>
@@ -101,6 +124,7 @@ let selected=null;
 let selectedTarget=null;
 
 let playerTurn=true;
+let chain=[];
 
 async function getCard(name){
   let res=await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
@@ -120,18 +144,15 @@ async function startGame(){
   baseCards=[
     await getCard("Blue-Eyes White Dragon"),
     await getCard("Dark Magician"),
-    await getCard("Raigeki"),
-    await getCard("Mirror Force")
+    await getCard("Mirror Force"),
+    await getCard("Raigeki")
   ];
 
   buildDeck();
 
   for(let i=0;i<5;i++) drawCard();
 
-  for(let i=0;i<2;i++){
-    enemyField[i]=baseCards[0];
-  }
-
+  enemyField[0]=baseCards[0];
   renderEnemyField();
   updateTurn();
 }
@@ -166,31 +187,61 @@ function renderHand(){
   });
 }
 
+function summonAnim(img){
+  let el=document.createElement("div");
+  el.className="summon";
+  el.style.backgroundImage=`url(${img})`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+
 function placeCard(i){
   if(selected===null) return;
   if(playerField[i]) return;
 
   let card=hand[selected];
 
-  // SPELL/TRAP
+  // spell
   if(card.type.includes("Spell")){
-    enemyField=[null,null,null];
-    renderEnemyField();
+    chain.push(card);
+    resolveChain();
     hand.splice(selected,1);
     selected=null;
     renderHand();
     return;
   }
 
-  playerField[i]=card;
+  // trap face-down
+  if(card.type.includes("Trap")){
+    playerField[i]={...card, facedown:true};
+    let z=document.getElementById("playerField").children[i];
+    z.classList.add("facedown");
+    z.innerText="";
+  } else {
+    playerField[i]=card;
+    summonAnim(card.img);
 
-  let zone=document.getElementById("playerField").children[i];
-  zone.style.backgroundImage=`url(${card.img})`;
-  zone.innerText="ATK:"+card.atk;
+    let z=document.getElementById("playerField").children[i];
+    z.style.backgroundImage=`url(${card.img})`;
+    z.innerText="ATK:"+card.atk;
+  }
 
   hand.splice(selected,1);
   selected=null;
   renderHand();
+}
+
+function resolveChain(){
+  let reversed=[...chain].reverse();
+
+  reversed.forEach(c=>{
+    if(c.name.includes("Raigeki")){
+      enemyField=[null,null,null];
+      renderEnemyField();
+    }
+  });
+
+  chain=[];
 }
 
 function selectTarget(i){
@@ -203,27 +254,32 @@ function selectTarget(i){
   document.getElementById("enemy"+i).classList.add("target");
 }
 
-function attack(){
+function attackPhase(){
   if(!playerTurn) return;
-  if(selectedTarget===null) return alert("Select target");
 
-  let attacker=playerField.find(c=>c);
-  if(!attacker) return alert("No monster");
+  playerField.forEach((attacker,index)=>{
+    if(!attacker || attacker.facedown) return;
 
-  let target=enemyField[selectedTarget];
+    let target=enemyField[selectedTarget];
 
-  if(target){
-    if(attacker.atk>target.atk){
-      enemyField[selectedTarget]=null;
-      document.getElementById("enemyLP").innerText -= (attacker.atk-target.atk);
-    } else {
-      document.getElementById("playerLP").innerText -= (target.atk-attacker.atk);
+    // trap trigger
+    if(target && target.type.includes("Trap")){
+      alert("Trap Activated!");
+      return;
     }
-  } else {
-    document.getElementById("enemyLP").innerText -= attacker.atk;
-  }
 
-  selectedTarget=null;
+    if(target){
+      if(attacker.atk>target.atk){
+        enemyField[selectedTarget]=null;
+        document.getElementById("enemyLP").innerText -= (attacker.atk-target.atk);
+      } else {
+        document.getElementById("playerLP").innerText -= (target.atk-attacker.atk);
+      }
+    } else {
+      document.getElementById("enemyLP").innerText -= attacker.atk;
+    }
+  });
+
   renderEnemyField();
   enemyTurn();
 }
@@ -233,12 +289,13 @@ function enemyTurn(){
   updateTurn();
 
   setTimeout(()=>{
-    enemyField[0]=baseCards[0];
-    renderEnemyField();
+    let best = baseCards.reduce((a,b)=> a.atk>b.atk?a:b);
+    enemyField[0]=best;
 
     let dmg=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
     document.getElementById("playerLP").innerText -= dmg;
 
+    renderEnemyField();
     playerTurn=true;
     updateTurn();
   },1000);
@@ -248,6 +305,7 @@ function renderEnemyField(){
   for(let i=0;i<3;i++){
     let z=document.getElementById("enemy"+i);
     let c=enemyField[i];
+
     if(c){
       z.style.backgroundImage=`url(${c.img})`;
       z.innerText="ATK:"+c.atk;
@@ -260,13 +318,6 @@ function renderEnemyField(){
 
 function updateTurn(){
   document.getElementById("turnText").innerText = playerTurn?"Your Turn":"Enemy Turn";
-}
-
-async function searchCard(){
-  let name=prompt("Enter card name");
-  let c=await getCard(name);
-  hand.push(c);
-  renderHand();
 }
 
 window.onload=startGame;
