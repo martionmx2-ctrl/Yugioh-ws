@@ -8,7 +8,8 @@
     h1 { text-shadow:0 0 15px cyan; }
 
     input { padding:10px; width:250px; }
-    button { padding:10px; margin:5px; background:cyan; border:none; cursor:pointer; }
+    button { padding:10px; margin:5px; background:cyan; border:none; cursor:pointer; box-shadow:0 0 10px cyan; }
+    button:hover { box-shadow:0 0 25px cyan; transform:scale(1.05); }
 
     .results, .deck {
       display:flex; flex-wrap:wrap; justify-content:center;
@@ -21,9 +22,16 @@
       border:2px solid cyan;
       cursor:pointer;
       transition:0.2s;
+      position:relative;
     }
 
     .card:hover { transform:scale(1.1); box-shadow:0 0 15px cyan; }
+
+    .count-badge{
+      position:absolute; bottom:4px; right:4px;
+      background:rgba(0,0,0,0.7); padding:2px 6px; font-size:12px;
+      border:1px solid cyan;
+    }
 
     .stats { margin:10px; font-size:18px; }
   </style>
@@ -31,6 +39,10 @@
 <body>
 
 <h1>🃏 DECK BUILDER</h1>
+
+<button onclick="window.location.href='index.html'">⬅ Back to Duel</button>
+
+<br><br>
 
 <input id="searchInput" placeholder="Search card name..." />
 <button onclick="searchCard()">Search</button>
@@ -54,6 +66,15 @@
 
 let deck = [];
 
+// load saved deck
+window.onload = function(){
+  let saved = localStorage.getItem("myDeck");
+  if(saved){
+    deck = JSON.parse(saved);
+    renderDeck();
+  }
+};
+
 function getCounts(){
   let monsters=0, spells=0, traps=0;
 
@@ -64,6 +85,10 @@ function getCounts(){
   });
 
   return {monsters, spells, traps};
+}
+
+function getCardCopies(name){
+  return deck.filter(c=>c.name===name).length;
 }
 
 function updateStats(){
@@ -78,11 +103,18 @@ function updateStats(){
 async function searchCard(){
   let name = document.getElementById("searchInput").value;
 
+  if(!name) return alert("Enter a card name");
+
   let res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(name)}`);
   let data = await res.json();
 
   let resultsDiv = document.getElementById("results");
   resultsDiv.innerHTML = "";
+
+  if(!data.data){
+    resultsDiv.innerHTML = "No results found";
+    return;
+  }
 
   data.data.slice(0,10).forEach(card => {
 
@@ -107,11 +139,13 @@ async function searchCard(){
 function addToDeck(card){
   let {monsters, spells, traps} = getCounts();
 
+  // total limit
   if(deck.length >= 40){
     alert("Deck full (40 cards)");
     return;
   }
 
+  // type limits
   if(card.type.includes("Monster") && monsters >= 20){
     alert("Max 20 monsters");
     return;
@@ -124,6 +158,12 @@ function addToDeck(card){
 
   if(card.type.includes("Trap") && traps >= 10){
     alert("Max 10 traps");
+    return;
+  }
+
+  // 3 copy rule
+  if(getCardCopies(card.name) >= 3){
+    alert("Max 3 copies of a card");
     return;
   }
 
@@ -140,10 +180,22 @@ function renderDeck(){
   let d = document.getElementById("deck");
   d.innerHTML = "";
 
+  let counts = {};
+
+  deck.forEach(card=>{
+    counts[card.name] = (counts[card.name] || 0) + 1;
+  });
+
   deck.forEach((card,i)=>{
     let el = document.createElement("div");
     el.className = "card";
     el.style.backgroundImage = `url(${card.img})`;
+
+    let badge = document.createElement("div");
+    badge.className = "count-badge";
+    badge.innerText = counts[card.name] + "x";
+
+    el.appendChild(badge);
 
     el.onclick = () => removeCard(i);
 
