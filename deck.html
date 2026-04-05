@@ -4,53 +4,30 @@
   <title>Deck Builder</title>
 
   <style>
-    body {
-      margin: 0;
-      background: black;
-      color: cyan;
-      font-family: Arial;
-      text-align: center;
-    }
+    body { margin:0; background:black; color:cyan; font-family:Arial; text-align:center; }
+    h1 { text-shadow:0 0 15px cyan; }
 
-    h1 { text-shadow: 0 0 15px cyan; }
-
-    input {
-      padding: 10px;
-      width: 250px;
-    }
-
-    button {
-      padding: 10px;
-      margin: 5px;
-      background: cyan;
-      border: none;
-      cursor: pointer;
-    }
+    input { padding:10px; width:250px; }
+    button { padding:10px; margin:5px; background:cyan; border:none; cursor:pointer; }
 
     .results, .deck {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin: 20px;
+      display:flex; flex-wrap:wrap; justify-content:center;
+      gap:10px; margin:20px;
     }
 
     .card {
-      width: 100px;
-      height: 140px;
-      background-size: cover;
-      border: 2px solid cyan;
-      cursor: pointer;
-      transition: 0.2s;
+      width:100px; height:140px;
+      background-size:cover;
+      border:2px solid cyan;
+      cursor:pointer;
+      transition:0.2s;
     }
 
-    .card:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 15px cyan;
-    }
+    .card:hover { transform:scale(1.1); box-shadow:0 0 15px cyan; }
+
+    .stats { margin:10px; font-size:18px; }
   </style>
 </head>
-
 <body>
 
 <h1>🃏 DECK BUILDER</h1>
@@ -59,6 +36,13 @@
 <button onclick="searchCard()">Search</button>
 <button onclick="saveDeck()">Save Deck</button>
 <button onclick="clearDeck()">Clear Deck</button>
+
+<div class="stats">
+  Total: <span id="total">0</span> |
+  Monsters: <span id="monsters">0</span> |
+  Spells: <span id="spells">0</span> |
+  Traps: <span id="traps">0</span>
+</div>
 
 <h2>Search Results</h2>
 <div id="results" class="results"></div>
@@ -70,7 +54,27 @@
 
 let deck = [];
 
-/* 🔍 SEARCH CARD */
+function getCounts(){
+  let monsters=0, spells=0, traps=0;
+
+  deck.forEach(c=>{
+    if(c.type.includes("Monster")) monsters++;
+    else if(c.type.includes("Spell")) spells++;
+    else if(c.type.includes("Trap")) traps++;
+  });
+
+  return {monsters, spells, traps};
+}
+
+function updateStats(){
+  let {monsters, spells, traps} = getCounts();
+
+  document.getElementById("total").innerText = deck.length;
+  document.getElementById("monsters").innerText = monsters;
+  document.getElementById("spells").innerText = spells;
+  document.getElementById("traps").innerText = traps;
+}
+
 async function searchCard(){
   let name = document.getElementById("searchInput").value;
 
@@ -100,10 +104,26 @@ async function searchCard(){
   });
 }
 
-/* ➕ ADD TO DECK */
 function addToDeck(card){
+  let {monsters, spells, traps} = getCounts();
+
   if(deck.length >= 40){
     alert("Deck full (40 cards)");
+    return;
+  }
+
+  if(card.type.includes("Monster") && monsters >= 20){
+    alert("Max 20 monsters");
+    return;
+  }
+
+  if(card.type.includes("Spell") && spells >= 10){
+    alert("Max 10 spells");
+    return;
+  }
+
+  if(card.type.includes("Trap") && traps >= 10){
+    alert("Max 10 traps");
     return;
   }
 
@@ -111,13 +131,11 @@ function addToDeck(card){
   renderDeck();
 }
 
-/* 🗑 REMOVE CARD */
 function removeCard(index){
   deck.splice(index,1);
   renderDeck();
 }
 
-/* 🎴 RENDER DECK */
 function renderDeck(){
   let d = document.getElementById("deck");
   d.innerHTML = "";
@@ -131,15 +149,20 @@ function renderDeck(){
 
     d.appendChild(el);
   });
+
+  updateStats();
 }
 
-/* 💾 SAVE */
 function saveDeck(){
+  if(deck.length < 40){
+    alert("Deck must be 40 cards!");
+    return;
+  }
+
   localStorage.setItem("myDeck", JSON.stringify(deck));
   alert("Deck Saved!");
 }
 
-/* ❌ CLEAR */
 function clearDeck(){
   deck = [];
   renderDeck();
