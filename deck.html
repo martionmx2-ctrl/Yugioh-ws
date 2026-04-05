@@ -1,33 +1,151 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Deck</title>
+  <title>Deck Builder</title>
+
   <style>
     body {
+      margin: 0;
       background: black;
-      color: white;
+      color: cyan;
+      font-family: Arial;
       text-align: center;
     }
 
-    img {
-      width: 150px;
-      margin: 10px;
-      transition: 0.3s;
+    h1 { text-shadow: 0 0 15px cyan; }
+
+    input {
+      padding: 10px;
+      width: 250px;
     }
 
-    img:hover {
+    button {
+      padding: 10px;
+      margin: 5px;
+      background: cyan;
+      border: none;
+      cursor: pointer;
+    }
+
+    .results, .deck {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px;
+    }
+
+    .card {
+      width: 100px;
+      height: 140px;
+      background-size: cover;
+      border: 2px solid cyan;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .card:hover {
       transform: scale(1.1);
+      box-shadow: 0 0 15px cyan;
     }
   </style>
 </head>
 
 <body>
 
-  <h1>🃏 My Deck</h1>
+<h1>🃏 DECK BUILDER</h1>
 
-  <img src="https://images.ygoprodeck.com/images/cards/89631139.jpg">
-  <img src="https://images.ygoprodeck.com/images/cards/46986414.jpg">
-  <img src="https://images.ygoprodeck.com/images/cards/74677422.jpg">
+<input id="searchInput" placeholder="Search card name..." />
+<button onclick="searchCard()">Search</button>
+<button onclick="saveDeck()">Save Deck</button>
+<button onclick="clearDeck()">Clear Deck</button>
+
+<h2>Search Results</h2>
+<div id="results" class="results"></div>
+
+<h2>Your Deck</h2>
+<div id="deck" class="deck"></div>
+
+<script>
+
+let deck = [];
+
+/* 🔍 SEARCH CARD */
+async function searchCard(){
+  let name = document.getElementById("searchInput").value;
+
+  let res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?fname=${encodeURIComponent(name)}`);
+  let data = await res.json();
+
+  let resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+
+  data.data.slice(0,10).forEach(card => {
+
+    let c = {
+      name: card.name,
+      atk: card.atk || 0,
+      def: card.def || 0,
+      type: card.type,
+      img: card.card_images[0].image_url
+    };
+
+    let el = document.createElement("div");
+    el.className = "card";
+    el.style.backgroundImage = `url(${c.img})`;
+
+    el.onclick = () => addToDeck(c);
+
+    resultsDiv.appendChild(el);
+  });
+}
+
+/* ➕ ADD TO DECK */
+function addToDeck(card){
+  if(deck.length >= 40){
+    alert("Deck full (40 cards)");
+    return;
+  }
+
+  deck.push(card);
+  renderDeck();
+}
+
+/* 🗑 REMOVE CARD */
+function removeCard(index){
+  deck.splice(index,1);
+  renderDeck();
+}
+
+/* 🎴 RENDER DECK */
+function renderDeck(){
+  let d = document.getElementById("deck");
+  d.innerHTML = "";
+
+  deck.forEach((card,i)=>{
+    let el = document.createElement("div");
+    el.className = "card";
+    el.style.backgroundImage = `url(${card.img})`;
+
+    el.onclick = () => removeCard(i);
+
+    d.appendChild(el);
+  });
+}
+
+/* 💾 SAVE */
+function saveDeck(){
+  localStorage.setItem("myDeck", JSON.stringify(deck));
+  alert("Deck Saved!");
+}
+
+/* ❌ CLEAR */
+function clearDeck(){
+  deck = [];
+  renderDeck();
+}
+
+</script>
 
 </body>
 </html>
