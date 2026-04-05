@@ -1,219 +1,156 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Duel Interface</title>
+  <title>Kaiba Duel System</title>
 
   <style>
     body {
       margin: 0;
       background: radial-gradient(circle, #000 40%, #020024 100%);
-      color: white;
+      color: cyan;
       font-family: Arial;
       text-align: center;
     }
 
-    .lp {
-      font-size: 20px;
+    h1 { text-shadow: 0 0 15px cyan; }
+
+    .lp { font-size: 20px; margin: 10px; }
+
+    .field-row {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
       margin: 10px;
     }
 
     .zone {
       width: 120px;
       height: 160px;
-      border: 2px solid rgba(0,255,255,0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border: 2px solid cyan;
       background-size: cover;
       background-position: center;
-      white-space: pre-line;
-      font-size: 12px;
-      backdrop-filter: blur(5px);
-      background-color: rgba(0, 255, 255, 0.05);
-      box-shadow: 0 0 10px cyan, inset 0 0 10px cyan;
-      transition: 0.3s;
-    }
-
-    .zone:hover {
-      box-shadow: 0 0 25px cyan;
-      transform: scale(1.05);
-    }
-
-    .field-grid {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 10px;
-    }
-
-    .field-row {
-      display: flex;
-      gap: 20px;
-    }
-
-    .hand {
-      display: flex;
       justify-content: center;
-      gap: 10px;
-      margin: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 0 10px cyan;
     }
+
+    .zone:hover { transform: scale(1.05); }
+    .target { box-shadow: 0 0 25px red !important; }
+
+    .hand { display:flex; justify-content:center; gap:10px; margin:20px; }
 
     .hand-card {
-      width: 80px;
-      height: 120px;
-      background-size: cover;
-      border: 2px solid gold;
-      cursor: pointer;
-    }
-
-    .selected {
-      box-shadow: 0 0 20px yellow;
+      width:80px; height:120px;
+      border:2px solid gold;
+      background-size:cover;
+      cursor:pointer;
     }
 
     button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: cyan;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .draw-anim {
-      position: fixed;
-      top: 40%;
-      left: 50%;
-      width: 100px;
-      height: 140px;
-      background-size: cover;
-      transform: translate(-50%, -50%) scale(0.5);
-      opacity: 0;
-      z-index: 1000;
-      animation: drawCardAnim 0.6s ease-out forwards;
-      box-shadow: 0 0 25px cyan;
-    }
-
-    @keyframes drawCardAnim {
-      0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-      50% { transform: translate(-50%, -60%) scale(1.2); opacity: 1; }
-      100% { transform: translate(-50%, 200%) scale(0.6); opacity: 0; }
+      padding:10px 20px;
+      background:cyan;
+      border:none;
+      margin:5px;
+      cursor:pointer;
     }
   </style>
 </head>
-
 <body>
 
-<h1>⚡ DUEL ARENA ⚡</h1>
-<h2 id="turnText">Your Turn</h2>
+<h1>⚡ KAIBA DUEL SYSTEM ⚡</h1>
+<h2 id="turnText">Loading...</h2>
 
 <div class="lp">
   You: <span id="playerLP">4000</span> |
   Enemy: <span id="enemyLP">4000</span>
 </div>
 
-<button onclick="drawCard()">Draw Card</button>
+<button onclick="drawCard()">Draw</button>
 <button onclick="attack()">Attack</button>
+<button onclick="searchCard()">Add Card</button>
 
-<h2>Your Hand</h2>
+<h2>Hand</h2>
 <div id="hand" class="hand"></div>
 
-<div class="field-grid">
+<h2>Enemy Field</h2>
+<div class="field-row">
+  <div class="zone" id="enemy0" onclick="selectTarget(0)"></div>
+  <div class="zone" id="enemy1" onclick="selectTarget(1)"></div>
+  <div class="zone" id="enemy2" onclick="selectTarget(2)"></div>
+</div>
 
-  <!-- Enemy Monsters -->
-  <div class="field-row">
-    <div class="zone" id="enemy0"></div>
-    <div class="zone" id="enemy1"></div>
-    <div class="zone" id="enemy2"></div>
-  </div>
-
-  <h2>⚔️ BATTLEFIELD ⚔️</h2>
-
-  <!-- Player Monsters -->
-  <div class="field-row" id="playerField">
-    <div class="zone" onclick="placeCard(0)"></div>
-    <div class="zone" onclick="placeCard(1)"></div>
-    <div class="zone" onclick="placeCard(2)"></div>
-  </div>
-
+<h2>Your Field</h2>
+<div class="field-row" id="playerField">
+  <div class="zone" onclick="placeCard(0)"></div>
+  <div class="zone" onclick="placeCard(1)"></div>
+  <div class="zone" onclick="placeCard(2)"></div>
 </div>
 
 <script>
 
-/* GAME STATE */
-let baseCards = [];
-let deck = [];
-let hand = [], selected = null;
+let baseCards=[];
+let deck=[], hand=[];
 let playerField=[null,null,null];
 let enemyField=[null,null,null];
 
-let playerTurn=true, gameOver=false;
+let selected=null;
+let selectedTarget=null;
 
-/* API */
+let playerTurn=true;
+
 async function getCard(name){
-  let res = await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
-  let data = await res.json();
-  let c = data.data[0];
+  let res=await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
+  let data=await res.json();
+  let c=data.data[0];
 
   return {
-    name: c.name,
-    atk: c.atk || 0,
-    img: c.card_images[0].image_url
+    name:c.name,
+    atk:c.atk||0,
+    def:c.def||0,
+    type:c.type,
+    img:c.card_images[0].image_url
   };
 }
 
-/* BUILD DECK */
-function buildDeck(){
-  deck = [];
-  baseCards.forEach(card=>{
-    for(let i=0;i<5;i++){
-      deck.push({...card});
-    }
-  });
-}
-
-/* START GAME */
 async function startGame(){
-
-  baseCards = [
+  baseCards=[
     await getCard("Blue-Eyes White Dragon"),
     await getCard("Dark Magician"),
-    await getCard("Red-Eyes Black Dragon")
+    await getCard("Raigeki"),
+    await getCard("Mirror Force")
   ];
 
   buildDeck();
 
-  for(let i=0;i<5;i++){
-    drawCard();
-  }
+  for(let i=0;i<5;i++) drawCard();
 
   for(let i=0;i<2;i++){
-    let card = baseCards[Math.floor(Math.random()*baseCards.length)];
-    enemyField[i]=card;
-    renderEnemyField();
+    enemyField[i]=baseCards[0];
   }
+
+  renderEnemyField();
+  updateTurn();
 }
 
-/* DRAW */
+function buildDeck(){
+  deck=[];
+  baseCards.forEach(c=>{
+    for(let i=0;i<3;i++) deck.push({...c});
+  });
+}
+
 function drawCard(){
-  if(!playerTurn||deck.length===0) return;
-
-  let card=deck.pop();
-  hand.push(card);
-
-  playAnim(card.img);
+  if(!playerTurn) return;
+  let c=deck.pop();
+  if(!c) return;
+  hand.push(c);
   renderHand();
 }
 
-/* ANIMATION */
-function playAnim(img){
-  let anim=document.createElement("div");
-  anim.className="draw-anim";
-  anim.style.backgroundImage=`url(${img})`;
-  document.body.appendChild(anim);
-  setTimeout(()=>anim.remove(),600);
-}
-
-/* HAND */
 function renderHand(){
   let h=document.getElementById("hand");
   h.innerHTML="";
@@ -223,23 +160,27 @@ function renderHand(){
     d.className="hand-card";
     d.style.backgroundImage=`url(${c.img})`;
 
-    if(i===selected) d.classList.add("selected");
-
-    d.onclick=()=>{
-      selected=i;
-      renderHand();
-    };
+    d.onclick=()=>{ selected=i; };
 
     h.appendChild(d);
   });
 }
 
-/* PLACE */
 function placeCard(i){
-  if(selected===null||playerField[i]) return;
+  if(selected===null) return;
+  if(playerField[i]) return;
 
   let card=hand[selected];
-  playAnim(card.img);
+
+  // SPELL/TRAP
+  if(card.type.includes("Spell")){
+    enemyField=[null,null,null];
+    renderEnemyField();
+    hand.splice(selected,1);
+    selected=null;
+    renderHand();
+    return;
+  }
 
   playerField[i]=card;
 
@@ -249,63 +190,86 @@ function placeCard(i){
 
   hand.splice(selected,1);
   selected=null;
-
   renderHand();
 }
 
-/* ATTACK */
+function selectTarget(i){
+  selectedTarget=i;
+
+  for(let x=0;x<3;x++){
+    document.getElementById("enemy"+x).classList.remove("target");
+  }
+
+  document.getElementById("enemy"+i).classList.add("target");
+}
+
 function attack(){
   if(!playerTurn) return;
+  if(selectedTarget===null) return alert("Select target");
 
-  let dmg=playerField.reduce((s,c)=>s+(c?c.atk:0),0);
+  let attacker=playerField.find(c=>c);
+  if(!attacker) return alert("No monster");
 
-  let enemyLP=document.getElementById("enemyLP");
-  enemyLP.innerText=Math.max(0,enemyLP.innerText-dmg);
+  let target=enemyField[selectedTarget];
 
-  playerTurn=false;
-  updateTurnText();
-  setTimeout(enemyTurn,1000);
-}
+  if(target){
+    if(attacker.atk>target.atk){
+      enemyField[selectedTarget]=null;
+      document.getElementById("enemyLP").innerText -= (attacker.atk-target.atk);
+    } else {
+      document.getElementById("playerLP").innerText -= (target.atk-attacker.atk);
+    }
+  } else {
+    document.getElementById("enemyLP").innerText -= attacker.atk;
+  }
 
-/* ENEMY */
-function enemyTurn(){
-  let i=Math.floor(Math.random()*3);
-  let card=baseCards[Math.floor(Math.random()*baseCards.length)];
-
-  enemyField[i]=card;
+  selectedTarget=null;
   renderEnemyField();
-
-  let dmg=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
-
-  let playerLP=document.getElementById("playerLP");
-  playerLP.innerText=Math.max(0,playerLP.innerText-dmg);
-
-  playerTurn=true;
-  updateTurnText();
+  enemyTurn();
 }
 
-/* RENDER ENEMY */
+function enemyTurn(){
+  playerTurn=false;
+  updateTurn();
+
+  setTimeout(()=>{
+    enemyField[0]=baseCards[0];
+    renderEnemyField();
+
+    let dmg=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
+    document.getElementById("playerLP").innerText -= dmg;
+
+    playerTurn=true;
+    updateTurn();
+  },1000);
+}
+
 function renderEnemyField(){
   for(let i=0;i<3;i++){
-    let zone=document.getElementById("enemy"+i);
-    if(enemyField[i]){
-      zone.style.backgroundImage=`url(${enemyField[i].img})`;
-      zone.innerText="ATK:"+enemyField[i].atk;
+    let z=document.getElementById("enemy"+i);
+    let c=enemyField[i];
+    if(c){
+      z.style.backgroundImage=`url(${c.img})`;
+      z.innerText="ATK:"+c.atk;
+    } else {
+      z.style.backgroundImage="";
+      z.innerText="";
     }
   }
 }
 
-/* TURN TEXT */
-function updateTurnText(){
-  document.getElementById("turnText").innerText =
-    playerTurn ? "Your Turn" : "Enemy Turn";
+function updateTurn(){
+  document.getElementById("turnText").innerText = playerTurn?"Your Turn":"Enemy Turn";
 }
 
-/* INIT */
-window.onload = async function(){
-  await startGame();
-  updateTurnText();
-};
+async function searchCard(){
+  let name=prompt("Enter card name");
+  let c=await getCard(name);
+  hand.push(c);
+  renderHand();
+}
+
+window.onload=startGame;
 
 </script>
 
