@@ -3,64 +3,461 @@
 <head>
   <title>Kaiba Duel System</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: radial-gradient(circle, #000 40%, #020024 100%);
-      color: cyan;
-      font-family: Arial;
-      text-align: center;
-    }
+<style>
 
-    h1 { text-shadow: 0 0 15px cyan; }
+*{
+  box-sizing:border-box;
+}
 
-    .lp { font-size: 20px; margin: 10px; }
+<body>
 
-    .field-row {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin: 10px;
-    }
+<h1>⚡ KAIBA DUEL SYSTEM ⚡</h1>
 
-    .zone {
-      width: 120px;
-      height: 160px;
-      border: 2px solid cyan;
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 0 10px cyan;
-    }
+<h2 id="turnText">Loading...</h2>
 
-    .zone:hover { transform: scale(1.05); }
-    .target { box-shadow: 0 0 25px red !important; }
+<div class="game-container">
 
-    .hand { display:flex; justify-content:center; gap:10px; margin:20px; }
+  <!-- LEFT PANEL -->
 
-    .hand-card {
-      width:80px; height:120px;
-      border:2px solid gold;
-      background-size:cover;
-      cursor:pointer;
-    }
+  <div class="left-panel">
 
-    button {
-      padding:10px 20px;
-      background:cyan;
-      border:none;
-      margin:5px;
-      cursor:pointer;
-      box-shadow:0 0 10px cyan;
-    }
+    <div class="hud-box">
 
-    button:hover { box-shadow:0 0 25px cyan; }
-  </style>
+      <h2>YOU</h2>
+
+      <div class="lp">
+        LP:
+        <span id="playerLP">4000</span>
+      </div>
+
+      <br>
+
+      Deck:
+      <span id="deckCount">0</span>
+
+    </div>
+
+    <button onclick="drawCard()">
+      DRAW CARD
+    </button>
+
+    <button onclick="attackPhase()">
+      ATTACK PHASE
+    </button>
+
+    <button onclick="window.location.href='deck.html'">
+      🃏 DECK BUILDER
+    </button>
+
+  </div>
+
+  <!-- ARENA -->
+
+  <div class="arena">
+
+    <!-- ENEMY FIELD -->
+
+    <div class="field-row">
+
+      <div class="zone" id="enemy0"
+        onclick="selectTarget(0)">
+      </div>
+
+      <div class="zone" id="enemy1"
+        onclick="selectTarget(1)">
+      </div>
+
+      <div class="zone" id="enemy2"
+        onclick="selectTarget(2)">
+      </div>
+
+    </div>
+
+    <div class="middle-text">
+      DUEL ARENA
+    </div>
+
+    <!-- PLAYER FIELD -->
+
+    <div class="field-row" id="playerField">
+
+      <div class="zone"
+        onclick="placeCard(0)">
+      </div>
+
+      <div class="zone"
+        onclick="placeCard(1)">
+      </div>
+
+      <div class="zone"
+        onclick="placeCard(2)">
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL -->
+
+  <div class="right-panel">
+
+    <div class="hud-box">
+
+      <h2>ENEMY</h2>
+
+      <div class="lp">
+        LP:
+        <span id="enemyLP">4000</span>
+      </div>
+
+    </div>
+
+    <div class="hud-box">
+
+      <h2>DUEL LOG</h2>
+
+      <p>⚡ Duel initialized...</p>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- HAND -->
+
+<div id="hand" class="hand"></div>
+
+</body>
+  margin:0;
+  overflow:hidden;
+
+  font-family:Arial, sans-serif;
+
+  background:
+    radial-gradient(circle at center,
+    #101840 0%,
+    #050816 55%,
+    #000814 100%);
+
+  color:cyan;
+}
+
+/* ANIMATED BACKGROUND */
+
+body::before{
+  content:"";
+
+  position:fixed;
+  inset:0;
+
+  background-image:
+    radial-gradient(cyan 1px, transparent 1px);
+
+  background-size:50px 50px;
+
+  opacity:.08;
+
+  animation:bgMove 20s linear infinite;
+
+  pointer-events:none;
+}
+
+@keyframes bgMove{
+  from{
+    transform:translateY(0);
+  }
+
+  to{
+    transform:translateY(-200px);
+  }
+}
+
+/* TITLE */
+
+h1{
+  text-align:center;
+
+  font-size:42px;
+
+  letter-spacing:4px;
+
+  text-shadow:
+    0 0 10px cyan,
+    0 0 20px cyan,
+    0 0 40px blue;
+}
+
+/* TURN TEXT */
+
+#turnText{
+  text-align:center;
+
+  text-shadow:
+    0 0 10px cyan;
+}
+
+/* MAIN GAME LAYOUT */
+
+.game-container{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  width:100vw;
+  height:78vh;
+
+  padding:20px;
+}
+
+/* SIDE HUDS */
+
+.left-panel,
+.right-panel{
+
+  width:240px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:20px;
+}
+
+/* HUD BOXES */
+
+.hud-box{
+
+  background:rgba(0,20,60,.45);
+
+  border:1px solid cyan;
+
+  border-radius:15px;
+
+  padding:20px;
+
+  backdrop-filter:blur(10px);
+
+  box-shadow:
+    0 0 20px cyan,
+    inset 0 0 20px rgba(0,255,255,.15);
+}
+
+/* DUEL FIELD */
+
+.arena{
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:50px;
+}
+
+/* FIELD ROWS */
+
+.field-row{
+
+  display:flex;
+
+  gap:20px;
+}
+
+/* CARD ZONES */
+
+.zone{
+
+  width:120px;
+  height:170px;
+
+  border-radius:14px;
+
+  border:2px solid rgba(0,255,255,.7);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(0,255,255,.08),
+      rgba(0,0,40,.55)
+    );
+
+  background-size:cover;
+  background-position:center;
+
+  display:flex;
+
+  justify-content:center;
+  align-items:end;
+
+  padding-bottom:8px;
+
+  font-size:14px;
+  font-weight:bold;
+
+  text-shadow:0 0 10px black;
+
+  box-shadow:
+    0 0 15px cyan,
+    inset 0 0 20px rgba(0,255,255,.2);
+
+  transition:.25s;
+
+  cursor:pointer;
+}
+
+.zone:hover{
+
+  transform:
+    scale(1.05)
+    translateY(-5px);
+
+  box-shadow:
+    0 0 25px cyan,
+    0 0 60px blue;
+}
+
+/* TARGET */
+
+.target{
+  box-shadow:
+    0 0 25px red,
+    0 0 50px crimson !important;
+}
+
+/* CENTER TEXT */
+
+.middle-text{
+
+  font-size:38px;
+
+  letter-spacing:6px;
+
+  text-shadow:
+    0 0 15px cyan,
+    0 0 40px blue;
+}
+
+/* HAND BAR */
+
+.hand{
+
+  position:fixed;
+
+  bottom:0;
+
+  left:0;
+
+  width:100%;
+
+  height:170px;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  gap:15px;
+
+  background:rgba(0,0,30,.75);
+
+  backdrop-filter:blur(10px);
+
+  border-top:2px solid cyan;
+
+  box-shadow:
+    0 -5px 20px rgba(0,255,255,.25);
+}
+
+/* HAND CARDS */
+
+.hand-card{
+
+  width:90px;
+  height:130px;
+
+  border-radius:10px;
+
+  border:2px solid rgba(0,255,255,.6);
+
+  background-size:cover;
+
+  transition:.25s;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 0 10px rgba(0,255,255,.5);
+}
+
+.hand-card:hover{
+
+  transform:
+    translateY(-25px)
+    scale(1.08);
+
+  box-shadow:
+    0 0 30px cyan,
+    0 0 50px blue;
+}
+
+/* BUTTONS */
+
+button{
+
+  padding:14px;
+
+  border:none;
+
+  border-radius:12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(0,255,255,.25),
+      rgba(0,120,255,.2)
+    );
+
+  color:cyan;
+
+  font-weight:bold;
+
+  letter-spacing:1px;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 0 15px cyan;
+
+  transition:.25s;
+}
+
+button:hover{
+
+  transform:scale(1.05);
+
+  box-shadow:
+    0 0 25px cyan,
+    0 0 50px blue;
+}
+
+/* LP */
+
+.lp{
+  font-size:24px;
+
+  text-shadow:
+    0 0 10px cyan;
+}
+
+</style>
 </head>
 <body>
 
