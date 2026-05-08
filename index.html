@@ -439,7 +439,7 @@ button:hover{
 
     <!-- PLAYER FIELD -->
 
-    <div class="field-row" id="playerField">
+    <div class="field-row" id="playerMonsters">
 
       <div class="zone"
         onclick="placeCard(0)">
@@ -545,9 +545,9 @@ async function startGame(){
     drawCard();
   }
 
-  enemyField[0]=baseCards[0];
+  enemyMonsters[0]=baseCards[0];
 
-  renderEnemyField();
+  renderenemyMonsters();
 
   updateTurn();
 }
@@ -616,13 +616,13 @@ function placeCard(i){
 
   if(selected===null) return;
 
-  if(playerField[i]) return;
+  if(playerMonsters[i]) return;
 
   let card=hand[selected];
 
-  playerField[i]=card;
+  playerMonsters[i]=card;
 
-  let z=document.getElementById("playerField").children[i];
+  let z=document.getElementById("playerMonsters").children[i];
 
   z.style.backgroundImage=`url(${card.img})`;
 
@@ -657,17 +657,17 @@ function attackPhase(){
 
   if(!playerTurn) return;
 
-  playerField.forEach(attacker=>{
+  playerMonsters.forEach(attacker=>{
 
     if(!attacker) return;
 
-    let target=enemyField[selectedTarget];
+    let target=enemyMonsters[selectedTarget];
 
     if(target){
 
       if(attacker.atk>target.atk){
 
-        enemyField[selectedTarget]=null;
+        enemyMonsters[selectedTarget]=null;
 
         document.getElementById("enemyLP").innerText -=
           (attacker.atk-target.atk);
@@ -685,7 +685,7 @@ function attackPhase(){
     }
   });
 
-  renderEnemyField();
+  renderenemyMonsters();
 
   enemyTurn();
 }
@@ -701,14 +701,14 @@ function enemyTurn(){
     let best=
       baseCards.reduce((a,b)=>a.atk>b.atk?a:b);
 
-    enemyField[0]=best;
+    enemyMonsters[0]=best;
 
     let dmg=
-      enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
+      enemyMonsters.reduce((s,c)=>s+(c?c.atk:0),0);
 
     document.getElementById("playerLP").innerText -= dmg;
 
-    renderEnemyField();
+    renderenemyMonsters();
 
     playerTurn=true;
 
@@ -717,13 +717,13 @@ function enemyTurn(){
   },1000);
 }
 
-function renderEnemyField(){
+function renderenemyMonsters(){
 
   for(let i=0;i<3;i++){
 
     let z=document.getElementById("enemy"+i);
 
-    let c=enemyField[i];
+    let c=enemyMonsters[i];
 
     if(c){
 
