@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -159,7 +160,7 @@ h1{
 
   align-items:center;
 
-  gap:55px;
+  gap:25px;
 }
 
 /* FIELD ROWS */
@@ -175,8 +176,8 @@ h1{
 
 .zone{
 
-  width:115px;
-  height:165px;
+  width:110px;
+  height:160px;
 
   border-radius:12px;
 
@@ -223,6 +224,15 @@ h1{
 
   box-shadow:
     0 0 18px rgba(0,255,255,.35);
+}
+
+/* SPELL/TRAP ZONES */
+
+.spell-zone{
+
+  height:90px;
+
+  opacity:.75;
 }
 
 /* TARGET */
@@ -367,6 +377,7 @@ button:hover{
 }
 
 </style>
+
 </head>
 
 <body>
@@ -381,33 +392,35 @@ button:hover{
 
   <div class="left-panel">
 
-    <div class="hud-box">
+```
+<div class="hud-box">
 
-      <h2>YOU</h2>
+  <h2>YOU</h2>
 
-      <div class="lp">
-        LP:
-        <span id="playerLP">4000</span>
-      </div>
+  <div class="lp">
+    LP:
+    <span id="playerLP">4000</span>
+  </div>
 
-      <br>
+  <br>
 
-      Deck:
-      <span id="deckCount">0</span>
+  Deck:
+  <span id="deckCount">0</span>
 
-    </div>
+</div>
 
-    <button onclick="drawCard()">
-      DRAW CARD
-    </button>
+<button onclick="drawCard()">
+  DRAW CARD
+</button>
 
-    <button onclick="attackPhase()">
-      ATTACK PHASE
-    </button>
+<button onclick="attackPhase()">
+  ATTACK PHASE
+</button>
 
-    <button onclick="window.location.href='deck.html'">
-      🃏 DECK BUILDER
-    </button>
+<button onclick="window.location.href='deck.html'">
+  🃏 DECK BUILDER
+</button>
+```
 
   </div>
 
@@ -415,45 +428,87 @@ button:hover{
 
   <div class="arena">
 
-    <!-- ENEMY FIELD -->
+```
+<!-- ENEMY SPELL/TRAP -->
 
-    <div class="field-row">
+<div class="field-row">
 
-      <div class="zone" id="enemy0"
-        onclick="selectTarget(0)">
-      </div>
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
 
-      <div class="zone" id="enemy1"
-        onclick="selectTarget(1)">
-      </div>
+</div>
 
-      <div class="zone" id="enemy2"
-        onclick="selectTarget(2)">
-      </div>
+<!-- ENEMY MONSTERS -->
 
-    </div>
+<div class="field-row">
 
-    <div class="middle-text">
-      DUEL ARENA
-    </div>
+  <div class="zone" id="enemy0"
+    onclick="selectTarget(0)">
+  </div>
 
-    <!-- PLAYER FIELD -->
+  <div class="zone" id="enemy1"
+    onclick="selectTarget(1)">
+  </div>
 
-    <div class="field-row" id="playerMonsters">
+  <div class="zone" id="enemy2"
+    onclick="selectTarget(2)">
+  </div>
 
-      <div class="zone"
-        onclick="placeCard(0)">
-      </div>
+  <div class="zone" id="enemy3"
+    onclick="selectTarget(3)">
+  </div>
 
-      <div class="zone"
-        onclick="placeCard(1)">
-      </div>
+  <div class="zone" id="enemy4"
+    onclick="selectTarget(4)">
+  </div>
 
-      <div class="zone"
-        onclick="placeCard(2)">
-      </div>
+</div>
 
-    </div>
+<div class="middle-text">
+  DUEL ARENA
+</div>
+
+<!-- PLAYER MONSTERS -->
+
+<div class="field-row" id="playerMonsterField">
+
+  <div class="zone"
+    onclick="placeCard(0)">
+  </div>
+
+  <div class="zone"
+    onclick="placeCard(1)">
+  </div>
+
+  <div class="zone"
+    onclick="placeCard(2)">
+  </div>
+
+  <div class="zone"
+    onclick="placeCard(3)">
+  </div>
+
+  <div class="zone"
+    onclick="placeCard(4)">
+  </div>
+
+</div>
+
+<!-- PLAYER SPELL/TRAP -->
+
+<div class="field-row">
+
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
+  <div class="zone spell-zone"></div>
+
+</div>
+```
 
   </div>
 
@@ -461,24 +516,26 @@ button:hover{
 
   <div class="right-panel">
 
-    <div class="hud-box">
+```
+<div class="hud-box">
 
-      <h2>ENEMY</h2>
+  <h2>ENEMY</h2>
 
-      <div class="lp">
-        LP:
-        <span id="enemyLP">4000</span>
-      </div>
+  <div class="lp">
+    LP:
+    <span id="enemyLP">4000</span>
+  </div>
 
-    </div>
+</div>
 
-    <div class="hud-box">
+<div class="hud-box">
 
-      <h2>DUEL LOG</h2>
+  <h2>DUEL LOG</h2>
 
-      <p>⚡ Duel initialized...</p>
+  <p>⚡ Duel initialized...</p>
 
-    </div>
+</div>
+```
 
   </div>
 
@@ -491,7 +548,9 @@ button:hover{
 <script>
 
 let baseCards=[];
+
 let deck=[], hand=[];
+
 let playerMonsters=[null,null,null,null,null];
 let enemyMonsters=[null,null,null,null,null];
 
@@ -524,7 +583,8 @@ async function getCard(name){
 
 async function startGame(){
 
-  let savedDeck=localStorage.getItem("myDeck");
+  let savedDeck=
+    localStorage.getItem("myDeck");
 
   if(savedDeck){
 
@@ -542,12 +602,13 @@ async function startGame(){
   buildDeck();
 
   for(let i=0;i<5;i++){
+
     drawCard();
   }
 
   enemyMonsters[0]=baseCards[0];
 
-  renderenemyMonsters();
+  renderEnemyMonsters();
 
   updateTurn();
 }
@@ -586,7 +647,9 @@ function drawCard(){
 
 function updateDeckCount(){
 
-  document.getElementById("deckCount").innerText=deck.length;
+  document.getElementById(
+    "deckCount"
+  ).innerText=deck.length;
 }
 
 function renderHand(){
@@ -601,7 +664,8 @@ function renderHand(){
 
     d.className="hand-card";
 
-    d.style.backgroundImage=`url(${c.img})`;
+    d.style.backgroundImage=
+      `url(${c.img})`;
 
     d.onclick=()=>{
 
@@ -622,9 +686,15 @@ function placeCard(i){
 
   playerMonsters[i]=card;
 
-  let z=document.getElementById("playerMonsters").children[i];
+  let z=
+    document
+      .getElementById(
+        "playerMonsterField"
+      )
+      .children[i];
 
-  z.style.backgroundImage=`url(${card.img})`;
+  z.style.backgroundImage=
+    `url(${card.img})`;
 
   z.innerText=`ATK ${card.atk}`;
 
@@ -639,7 +709,7 @@ function selectTarget(i){
 
   selectedTarget=i;
 
-  for(let x=0;x<3;x++){
+  for(let x=0;x<5;x++){
 
     document
       .getElementById("enemy"+x)
@@ -661,7 +731,8 @@ function attackPhase(){
 
     if(!attacker) return;
 
-    let target=enemyMonsters[selectedTarget];
+    let target=
+      enemyMonsters[selectedTarget];
 
     if(target){
 
@@ -669,23 +740,28 @@ function attackPhase(){
 
         enemyMonsters[selectedTarget]=null;
 
-        document.getElementById("enemyLP").innerText -=
+        document.getElementById(
+          "enemyLP"
+        ).innerText -=
           (attacker.atk-target.atk);
 
       }else{
 
-        document.getElementById("playerLP").innerText -=
+        document.getElementById(
+          "playerLP"
+        ).innerText -=
           (target.atk-attacker.atk);
       }
 
     }else{
 
-      document.getElementById("enemyLP").innerText -=
-        attacker.atk;
+      document.getElementById(
+        "enemyLP"
+      ).innerText -= attacker.atk;
     }
   });
 
-  renderenemyMonsters();
+  renderEnemyMonsters();
 
   enemyTurn();
 }
@@ -699,16 +775,22 @@ function enemyTurn(){
   setTimeout(()=>{
 
     let best=
-      baseCards.reduce((a,b)=>a.atk>b.atk?a:b);
+      baseCards.reduce(
+        (a,b)=>a.atk>b.atk?a:b
+      );
 
     enemyMonsters[0]=best;
 
     let dmg=
-      enemyMonsters.reduce((s,c)=>s+(c?c.atk:0),0);
+      enemyMonsters.reduce(
+        (s,c)=>s+(c?c.atk:0),0
+      );
 
-    document.getElementById("playerLP").innerText -= dmg;
+    document.getElementById(
+      "playerLP"
+    ).innerText -= dmg;
 
-    renderenemyMonsters();
+    renderEnemyMonsters();
 
     playerTurn=true;
 
@@ -717,17 +799,21 @@ function enemyTurn(){
   },1000);
 }
 
-function renderenemyMonsters(){
+function renderEnemyMonsters(){
 
-  for(let i=0;i<3;i++){
+  for(let i=0;i<5;i++){
 
-    let z=document.getElementById("enemy"+i);
+    let z=
+      document.getElementById(
+        "enemy"+i
+      );
 
     let c=enemyMonsters[i];
 
     if(c){
 
-      z.style.backgroundImage=`url(${c.img})`;
+      z.style.backgroundImage=
+        `url(${c.img})`;
 
       z.innerText=`ATK ${c.atk}`;
 
@@ -742,7 +828,9 @@ function renderenemyMonsters(){
 
 function updateTurn(){
 
-  document.getElementById("turnText").innerText=
+  document.getElementById(
+    "turnText"
+  ).innerText=
     playerTurn
       ? "YOUR TURN"
       : "ENEMY TURN";
