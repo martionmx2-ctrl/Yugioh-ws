@@ -1,13 +1,373 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Kaiba Duel System</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Kaiba Duel System</title>
 
 <style>
 
 *{
   box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
+
+body{
+
+  overflow:hidden;
+
+  font-family:Arial, sans-serif;
+
+  background:
+    radial-gradient(circle at center,
+    #081120 0%,
+    #050816 45%,
+    #000 100%);
+
+  color:cyan;
+}
+
+/* ANIMATED GRID BACKGROUND */
+
+body::before{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  background-image:
+    radial-gradient(cyan 1px, transparent 1px);
+
+  background-size:45px 45px;
+
+  opacity:.06;
+
+  animation:bgMove 20s linear infinite;
+
+  pointer-events:none;
+}
+
+@keyframes bgMove{
+
+  from{
+    transform:translateY(0);
+  }
+
+  to{
+    transform:translateY(-200px);
+  }
+}
+
+/* TITLE */
+
+h1{
+
+  text-align:center;
+
+  margin-top:20px;
+
+  font-size:42px;
+
+  letter-spacing:4px;
+
+  text-shadow:
+    0 0 10px cyan,
+    0 0 25px blue;
+}
+
+/* TURN TEXT */
+
+#turnText{
+
+  text-align:center;
+
+  margin-top:10px;
+
+  font-size:24px;
+
+  text-shadow:
+    0 0 10px cyan;
+}
+
+/* MAIN LAYOUT */
+
+.game-container{
+
+  display:grid;
+
+  grid-template-columns:
+    240px 1fr 240px;
+
+  align-items:center;
+
+  width:100vw;
+
+  height:72vh;
+
+  padding:20px;
+
+  gap:40px;
+}
+
+/* SIDE PANELS */
+
+.left-panel,
+.right-panel{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:20px;
+}
+
+/* HOLOGRAM BOXES */
+
+.hud-box{
+
+  background:
+    rgba(0,20,60,.35);
+
+  border:
+    1px solid rgba(0,255,255,.25);
+
+  border-radius:15px;
+
+  padding:20px;
+
+  backdrop-filter:blur(10px);
+
+  box-shadow:
+    inset 0 0 20px rgba(0,255,255,.08),
+    0 0 15px rgba(0,255,255,.12);
+}
+
+/* DUEL FIELD */
+
+.arena{
+
+  display:flex;
+
+  flex-direction:column;
+
+  justify-content:center;
+
+  align-items:center;
+
+  gap:55px;
+}
+
+/* FIELD ROWS */
+
+.field-row{
+
+  display:flex;
+
+  gap:18px;
+}
+
+/* ZONES */
+
+.zone{
+
+  width:115px;
+  height:165px;
+
+  border-radius:12px;
+
+  border:
+    1px solid rgba(0,255,255,.3);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(0,255,255,.04),
+      rgba(0,0,40,.35)
+    );
+
+  background-size:cover;
+  background-position:center;
+
+  display:flex;
+
+  justify-content:center;
+  align-items:end;
+
+  padding-bottom:8px;
+
+  font-size:13px;
+
+  font-weight:bold;
+
+  text-shadow:0 0 10px black;
+
+  box-shadow:
+    inset 0 0 15px rgba(0,255,255,.05),
+    0 0 10px rgba(0,255,255,.12);
+
+  transition:.2s;
+
+  cursor:pointer;
+}
+
+.zone:hover{
+
+  transform:
+    translateY(-4px)
+    scale(1.03);
+
+  box-shadow:
+    0 0 18px rgba(0,255,255,.35);
+}
+
+/* TARGET */
+
+.target{
+
+  box-shadow:
+    0 0 20px crimson,
+    0 0 40px red !important;
+}
+
+/* CENTER TEXT */
+
+.middle-text{
+
+  font-size:34px;
+
+  letter-spacing:5px;
+
+  text-shadow:
+    0 0 12px cyan,
+    0 0 25px blue;
+}
+
+/* HAND BAR */
+
+.hand{
+
+  position:fixed;
+
+  bottom:0;
+
+  left:0;
+
+  width:100%;
+
+  height:145px;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:flex-end;
+
+  gap:12px;
+
+  padding-bottom:10px;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0,0,30,.96),
+      rgba(0,0,30,.7)
+    );
+
+  border-top:
+    1px solid rgba(0,255,255,.25);
+
+  backdrop-filter:blur(12px);
+}
+
+/* HAND CARDS */
+
+.hand-card{
+
+  width:90px;
+  height:130px;
+
+  border-radius:10px;
+
+  border:
+    1px solid rgba(0,255,255,.25);
+
+  background-size:cover;
+
+  cursor:pointer;
+
+  transition:.25s;
+
+  box-shadow:
+    0 0 10px rgba(0,255,255,.15);
+}
+
+.hand-card:hover{
+
+  transform:
+    translateY(-20px)
+    scale(1.05);
+
+  box-shadow:
+    0 0 20px rgba(0,255,255,.35);
+}
+
+/* BUTTONS */
+
+button{
+
+  padding:12px 18px;
+
+  border:none;
+
+  border-radius:10px;
+
+  background:
+    rgba(0,140,255,.12);
+
+  color:#7fefff;
+
+  font-weight:bold;
+
+  letter-spacing:1px;
+
+  cursor:pointer;
+
+  border:
+    1px solid rgba(0,255,255,.2);
+
+  box-shadow:
+    0 0 8px rgba(0,255,255,.15);
+
+  transition:.25s;
+}
+
+button:hover{
+
+  transform:translateY(-2px);
+
+  background:
+    rgba(0,180,255,.18);
+
+  box-shadow:
+    0 0 15px rgba(0,255,255,.25);
+}
+
+/* LP */
+
+.lp{
+
+  font-size:24px;
+
+  margin-top:10px;
+}
+
+</style>
+</head>
 
 <body>
 
@@ -128,362 +488,6 @@
 
 <div id="hand" class="hand"></div>
 
-</body>
-  margin:0;
-  overflow:hidden;
-
-  font-family:Arial, sans-serif;
-
-  background:
-    radial-gradient(circle at center,
-    #101840 0%,
-    #050816 55%,
-    #000814 100%);
-
-  color:cyan;
-}
-
-/* ANIMATED BACKGROUND */
-
-body::before{
-  content:"";
-
-  position:fixed;
-  inset:0;
-
-  background-image:
-    radial-gradient(cyan 1px, transparent 1px);
-
-  background-size:50px 50px;
-
-  opacity:.08;
-
-  animation:bgMove 20s linear infinite;
-
-  pointer-events:none;
-}
-
-@keyframes bgMove{
-  from{
-    transform:translateY(0);
-  }
-
-  to{
-    transform:translateY(-200px);
-  }
-}
-
-/* TITLE */
-
-h1{
-  text-align:center;
-
-  font-size:42px;
-
-  letter-spacing:4px;
-
-  text-shadow:
-    0 0 10px cyan,
-    0 0 20px cyan,
-    0 0 40px blue;
-}
-
-/* TURN TEXT */
-
-#turnText{
-  text-align:center;
-
-  text-shadow:
-    0 0 10px cyan;
-}
-
-/* MAIN GAME LAYOUT */
-
-.game-container{
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  width:100vw;
-  height:78vh;
-
-  padding:20px;
-}
-
-/* SIDE HUDS */
-
-.left-panel,
-.right-panel{
-
-  width:240px;
-
-  display:flex;
-
-  flex-direction:column;
-
-  gap:20px;
-}
-
-/* HUD BOXES */
-
-.hud-box{
-
-  background:rgba(0,20,60,.45);
-
-  border:1px solid cyan;
-
-  border-radius:15px;
-
-  padding:20px;
-
-  backdrop-filter:blur(10px);
-
-  box-shadow:
-    0 0 20px cyan,
-    inset 0 0 20px rgba(0,255,255,.15);
-}
-
-/* DUEL FIELD */
-
-.arena{
-
-  display:flex;
-
-  flex-direction:column;
-
-  align-items:center;
-
-  justify-content:center;
-
-  gap:50px;
-}
-
-/* FIELD ROWS */
-
-.field-row{
-
-  display:flex;
-
-  gap:20px;
-}
-
-/* CARD ZONES */
-
-.zone{
-
-  width:120px;
-  height:170px;
-
-  border-radius:14px;
-
-  border:2px solid rgba(0,255,255,.7);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(0,255,255,.08),
-      rgba(0,0,40,.55)
-    );
-
-  background-size:cover;
-  background-position:center;
-
-  display:flex;
-
-  justify-content:center;
-  align-items:end;
-
-  padding-bottom:8px;
-
-  font-size:14px;
-  font-weight:bold;
-
-  text-shadow:0 0 10px black;
-
-  box-shadow:
-    0 0 15px cyan,
-    inset 0 0 20px rgba(0,255,255,.2);
-
-  transition:.25s;
-
-  cursor:pointer;
-}
-
-.zone:hover{
-
-  transform:
-    scale(1.05)
-    translateY(-5px);
-
-  box-shadow:
-    0 0 25px cyan,
-    0 0 60px blue;
-}
-
-/* TARGET */
-
-.target{
-  box-shadow:
-    0 0 25px red,
-    0 0 50px crimson !important;
-}
-
-/* CENTER TEXT */
-
-.middle-text{
-
-  font-size:38px;
-
-  letter-spacing:6px;
-
-  text-shadow:
-    0 0 15px cyan,
-    0 0 40px blue;
-}
-
-/* HAND BAR */
-
-.hand{
-
-  position:fixed;
-
-  bottom:0;
-
-  left:0;
-
-  width:100%;
-
-  height:170px;
-
-  display:flex;
-
-  justify-content:center;
-
-  align-items:center;
-
-  gap:15px;
-
-  background:rgba(0,0,30,.75);
-
-  backdrop-filter:blur(10px);
-
-  border-top:2px solid cyan;
-
-  box-shadow:
-    0 -5px 20px rgba(0,255,255,.25);
-}
-
-/* HAND CARDS */
-
-.hand-card{
-
-  width:90px;
-  height:130px;
-
-  border-radius:10px;
-
-  border:2px solid rgba(0,255,255,.6);
-
-  background-size:cover;
-
-  transition:.25s;
-
-  cursor:pointer;
-
-  box-shadow:
-    0 0 10px rgba(0,255,255,.5);
-}
-
-.hand-card:hover{
-
-  transform:
-    translateY(-25px)
-    scale(1.08);
-
-  box-shadow:
-    0 0 30px cyan,
-    0 0 50px blue;
-}
-
-/* BUTTONS */
-
-button{
-
-  padding:12px 18px;
-
-  border:none;
-
-  border-radius:10px;
-
-  background:
-    rgba(0,140,255,.12);
-
-  color:#7fefff;
-
-  font-weight:bold;
-
-  letter-spacing:1px;
-
-  cursor:pointer;
-
-  border:1px solid rgba(0,255,255,.25);
-
-  box-shadow:
-    0 0 8px rgba(0,255,255,.25);
-
-  transition:.25s;
-}
-
-button:hover{
-
-  transform:translateY(-2px);
-
-  background:
-    rgba(0,180,255,.18);
-
-  box-shadow:
-    0 0 15px rgba(0,255,255,.45);
-}
-</style>
-</head>
-<body>
-
-<h1>⚡ KAIBA DUEL SYSTEM ⚡</h1>
-
-<button onclick="window.location.href='deck.html'">🃏 Deck Builder</button>
-
-<h2 id="turnText">Loading...</h2>
-
-<div class="lp">
-  You: <span id="playerLP">4000</span> |
-  Enemy: <span id="enemyLP">4000</span>
-</div>
-
-<div>Deck: <span id="deckCount">0</span></div>
-
-<button onclick="drawCard()">Draw</button>
-<button onclick="attackPhase()">Attack Phase</button>
-
-<h2>Hand</h2>
-<div id="hand" class="hand"></div>
-
-<h2>Enemy Field</h2>
-<div class="field-row">
-  <div class="zone" id="enemy0" onclick="selectTarget(0)"></div>
-  <div class="zone" id="enemy1" onclick="selectTarget(1)"></div>
-  <div class="zone" id="enemy2" onclick="selectTarget(2)"></div>
-</div>
-
-<h2>Your Field</h2>
-<div class="field-row" id="playerField">
-  <div class="zone" onclick="placeCard(0)"></div>
-  <div class="zone" onclick="placeCard(1)"></div>
-  <div class="zone" onclick="placeCard(2)"></div>
-</div>
-
 <script>
 
 let baseCards=[];
@@ -492,13 +496,18 @@ let playerField=[null,null,null];
 let enemyField=[null,null,null];
 
 let selected=null;
-let selectedTarget=null;
+let selectedTarget=0;
 
 let playerTurn=true;
 
 async function getCard(name){
-  let res=await fetch(`https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`);
+
+  let res=await fetch(
+    `https://db.ygoprodeck.com/api/v7/cardinfo.php?name=${encodeURIComponent(name)}`
+  );
+
   let data=await res.json();
+
   let c=data.data[0];
 
   return {
@@ -511,12 +520,16 @@ async function getCard(name){
 }
 
 async function startGame(){
-  let savedDeck = localStorage.getItem("myDeck");
+
+  let savedDeck=localStorage.getItem("myDeck");
 
   if(savedDeck){
-    baseCards = JSON.parse(savedDeck);
-  } else {
-    baseCards = [
+
+    baseCards=JSON.parse(savedDeck);
+
+  }else{
+
+    baseCards=[
       await getCard("Blue-Eyes White Dragon"),
       await getCard("Dark Magician"),
       await getCard("Red-Eyes Black Dragon")
@@ -525,57 +538,81 @@ async function startGame(){
 
   buildDeck();
 
-  for(let i=0;i<5;i++) drawCard();
+  for(let i=0;i<5;i++){
+    drawCard();
+  }
 
   enemyField[0]=baseCards[0];
+
   renderEnemyField();
+
   updateTurn();
 }
 
 function buildDeck(){
-  deck = [...baseCards];
+
+  deck=[...baseCards];
+
   shuffleDeck();
+
   updateDeckCount();
 }
 
 function shuffleDeck(){
-  for(let i = deck.length - 1; i > 0; i--){
-    let j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+
+  for(let i=deck.length-1;i>0;i--){
+
+    let j=Math.floor(Math.random()*(i+1));
+
+    [deck[i],deck[j]]=[deck[j],deck[i]];
   }
 }
 
 function drawCard(){
-  if(!playerTurn || deck.length === 0) return;
 
-  let card = deck.pop();
+  if(!playerTurn || deck.length===0) return;
+
+  let card=deck.pop();
+
   hand.push(card);
 
   renderHand();
+
   updateDeckCount();
 }
 
 function updateDeckCount(){
-  document.getElementById("deckCount").innerText = deck.length;
+
+  document.getElementById("deckCount").innerText=deck.length;
 }
 
 function renderHand(){
+
   let h=document.getElementById("hand");
+
   h.innerHTML="";
 
   hand.forEach((c,i)=>{
+
     let d=document.createElement("div");
+
     d.className="hand-card";
+
     d.style.backgroundImage=`url(${c.img})`;
 
-    d.onclick=()=>{ selected=i; };
+    d.onclick=()=>{
+
+      selected=i;
+    };
 
     h.appendChild(d);
   });
 }
 
 function placeCard(i){
+
   if(selected===null) return;
+
   if(playerField[i]) return;
 
   let card=hand[selected];
@@ -583,82 +620,129 @@ function placeCard(i){
   playerField[i]=card;
 
   let z=document.getElementById("playerField").children[i];
+
   z.style.backgroundImage=`url(${card.img})`;
-  z.innerText="ATK:"+card.atk;
+
+  z.innerText=`ATK ${card.atk}`;
 
   hand.splice(selected,1);
+
   selected=null;
+
   renderHand();
 }
 
 function selectTarget(i){
+
   selectedTarget=i;
 
   for(let x=0;x<3;x++){
-    document.getElementById("enemy"+x).classList.remove("target");
+
+    document
+      .getElementById("enemy"+x)
+      .classList
+      .remove("target");
   }
 
-  document.getElementById("enemy"+i).classList.add("target");
+  document
+    .getElementById("enemy"+i)
+    .classList
+    .add("target");
 }
 
 function attackPhase(){
+
   if(!playerTurn) return;
 
   playerField.forEach(attacker=>{
+
     if(!attacker) return;
 
     let target=enemyField[selectedTarget];
 
     if(target){
+
       if(attacker.atk>target.atk){
+
         enemyField[selectedTarget]=null;
-        document.getElementById("enemyLP").innerText -= (attacker.atk-target.atk);
-      } else {
-        document.getElementById("playerLP").innerText -= (target.atk-attacker.atk);
+
+        document.getElementById("enemyLP").innerText -=
+          (attacker.atk-target.atk);
+
+      }else{
+
+        document.getElementById("playerLP").innerText -=
+          (target.atk-attacker.atk);
       }
-    } else {
-      document.getElementById("enemyLP").innerText -= attacker.atk;
+
+    }else{
+
+      document.getElementById("enemyLP").innerText -=
+        attacker.atk;
     }
   });
 
   renderEnemyField();
+
   enemyTurn();
 }
 
 function enemyTurn(){
+
   playerTurn=false;
+
   updateTurn();
 
   setTimeout(()=>{
-    let best = baseCards.reduce((a,b)=> a.atk>b.atk?a:b);
+
+    let best=
+      baseCards.reduce((a,b)=>a.atk>b.atk?a:b);
+
     enemyField[0]=best;
 
-    let dmg=enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
+    let dmg=
+      enemyField.reduce((s,c)=>s+(c?c.atk:0),0);
+
     document.getElementById("playerLP").innerText -= dmg;
 
     renderEnemyField();
+
     playerTurn=true;
+
     updateTurn();
+
   },1000);
 }
 
 function renderEnemyField(){
+
   for(let i=0;i<3;i++){
+
     let z=document.getElementById("enemy"+i);
+
     let c=enemyField[i];
 
     if(c){
+
       z.style.backgroundImage=`url(${c.img})`;
-      z.innerText="ATK:"+c.atk;
-    } else {
+
+      z.innerText=`ATK ${c.atk}`;
+
+    }else{
+
       z.style.backgroundImage="";
+
       z.innerText="";
     }
   }
 }
 
 function updateTurn(){
-  document.getElementById("turnText").innerText = playerTurn?"Your Turn":"Enemy Turn";
+
+  document.getElementById("turnText").innerText=
+    playerTurn
+      ? "YOUR TURN"
+      : "ENEMY TURN";
 }
 
 window.onload=startGame;
