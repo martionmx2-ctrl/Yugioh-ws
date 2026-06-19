@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yu-Gi-Oh Banlist Hub</title>
 
 <style>
@@ -15,16 +17,20 @@ padding:20px;
 
 h1{
 text-align:center;
-text-shadow:0 0 10px cyan;
 }
 
-#search{
-width:100%;
-max-width:500px;
-padding:12px;
-margin:20px auto;
-display:block;
-font-size:18px;
+.controls{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+justify-content:center;
+margin:20px 0;
+}
+
+input,
+select{
+padding:10px;
+font-size:16px;
 }
 
 #results{
@@ -35,8 +41,8 @@ gap:20px;
 
 .card{
 border:1px solid cyan;
-border-radius:10px;
 padding:10px;
+border-radius:10px;
 text-align:center;
 background:rgba(0,255,255,.05);
 }
@@ -45,9 +51,19 @@ background:rgba(0,255,255,.05);
 width:100%;
 }
 
-.status{
+.forbidden{
+color:red;
 font-weight:bold;
-font-size:18px;
+}
+
+.limited{
+color:gold;
+font-weight:bold;
+}
+
+.semi{
+color:lime;
+font-weight:bold;
 }
 
 </style>
@@ -58,11 +74,29 @@ font-size:18px;
 
 <h1>🚫 Yu-Gi-Oh Banlist Hub 🚫</h1>
 
+<div class="controls">
+
 <input
+type="text"
 id="search"
-placeholder="Search card name..."
+placeholder="Search card..."
 
 >
+
+<select id="format">
+<option value="ban_tcg">TCG</option>
+<option value="ban_ocg">OCG</option>
+<option value="ban_md">Master Duel</option>
+</select>
+
+<select id="status">
+<option value="all">All</option>
+<option value="Forbidden">Forbidden</option>
+<option value="Limited">Limited</option>
+<option value="Semi-Limited">Semi-Limited</option>
+</select>
+
+</div>
 
 <div id="results"></div>
 
@@ -80,22 +114,67 @@ await fetch(
 const data=
 await response.json();
 
-cards=
-data.data.filter(
-c=>c.banlist_info?.ban_tcg
-);
+cards=data.data;
 
-display(cards);
+filterCards();
 }
 
-function display(list){
+function filterCards(){
+
+const search=
+document
+.getElementById("search")
+.value
+.toLowerCase();
+
+const format=
+document
+.getElementById("format")
+.value;
+
+const status=
+document
+.getElementById("status")
+.value;
 
 const results=
-document.getElementById("results");
+document
+.getElementById("results");
 
 results.innerHTML="";
 
-list.forEach(card=>{
+cards.forEach(card=>{
+
+const ban=
+card.banlist_info?.[format];
+
+if(!ban) return;
+
+if(
+status!=="all" &&
+ban!==status
+){
+return;
+}
+
+if(
+!card.name
+.toLowerCase()
+.includes(search)
+){
+return;
+}
+
+let cls="";
+
+if(ban==="Forbidden")
+cls="forbidden";
+
+if(ban==="Limited")
+cls="limited";
+
+if(ban==="Semi-Limited")
+cls="semi";
 
 results.innerHTML+=`
 
@@ -105,10 +184,8 @@ results.innerHTML+=`
 
 <h3>${card.name}</h3>
 
-<div class="status">
-
-${card.banlist_info.ban_tcg}
-
+<div class="${cls}">
+${ban}
 </div>
 
 </div>
@@ -121,24 +198,15 @@ ${card.banlist_info.ban_tcg}
 
 document
 .getElementById("search")
-.addEventListener("input",e=>{
+.addEventListener("input",filterCards);
 
-const term=
-e.target.value.toLowerCase();
+document
+.getElementById("format")
+.addEventListener("change",filterCards);
 
-display(
-
-cards.filter(card=>
-
-card.name
-.toLowerCase()
-.includes(term)
-
-)
-
-);
-
-});
+document
+.getElementById("status")
+.addEventListener("change",filterCards);
 
 loadCards();
 
