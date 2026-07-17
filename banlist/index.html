@@ -120,7 +120,44 @@ hr{
 margin:40px 0;
 border-color:cyan;
 }
+  .navbar{
 
+display:flex;
+justify-content:center;
+gap:15px;
+flex-wrap:wrap;
+
+margin:25px 0;
+}
+
+.navbar a{
+
+color:cyan;
+text-decoration:none;
+
+padding:12px 20px;
+
+border:1px solid cyan;
+
+border-radius:10px;
+
+background:rgba(0,255,255,.05);
+
+transition:.3s;
+
+font-weight:bold;
+}
+
+.navbar a:hover{
+
+background:rgba(0,255,255,.15);
+
+box-shadow:0 0 15px cyan;
+
+transform:translateY(-2px);
+}
+
+  
 </style>
 
 </head>
@@ -142,6 +179,18 @@ class="logo">
 
 </div>
 
+<nav class="navbar">
+
+<a href="../index.html">🏠 Home</a>
+
+<a href="../deck.html">🃏 Deck Builder</a>
+
+<a href="index.html">🚫 Banlist Hub</a>
+
+<a href="#deckInput">⚖️ Deck Checker</a>
+
+</nav>
+  
 <div class="controls">
 
 <input
